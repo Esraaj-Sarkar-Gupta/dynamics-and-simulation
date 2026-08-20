@@ -1,0 +1,78 @@
+\documentclass[11pt,a4paper]{article}
+
+% Page Layout - 2 cm margins on left and right
+\usepackage[a4paper, left=2cm, right=2cm, top=2.5cm, bottom=2.5cm]{geometry}
+\setlength{\parindent}{0pt}
+
+% Fonts (XeLaTeX-native, replaces inputenc/fontenc/lmodern)
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman}
+\setmonofont{DejaVu Sans Mono}   % or JuliaMono for full Julia glyph coverage
+\usepackage{microtype}
+
+% Colors
+\usepackage{xcolor}
+\definecolor{juliapurple}{RGB}{145, 53, 156}
+\definecolor{juliagreen}{RGB}{56, 152, 38}
+\definecolor{juliared}{RGB}{203, 60, 51}
+\definecolor{juliablue}{RGB}{64, 99, 216}
+\definecolor{codebg}{RGB}{248, 249, 250}
+\definecolor{codeframe}{RGB}{220, 224, 230}
+\definecolor{commentgray}{RGB}{108, 117, 125}
+
+% Math & Symbols
+\usepackage{amsmath, amssymb, amsfonts}
+
+% Code Listing Configuration for Julia (minted)
+\usepackage{minted}
+\usemintedstyle{friendly}   % pygments style; try "colorful", "tango", "friendly" etc.
+
+\setminted{
+    frame            = single,
+    rulecolor        = \color{codeframe},
+    framesep         = 6pt,
+    bgcolor          = codebg,
+    fontsize         = \small,
+    breaklines       = true,
+    breakafter       = ,        % allow breaks anywhere if needed; tune as desired
+    linenos          = true,
+    numbersep        = 10pt,
+    tabsize          = 4,
+    baselinestretch  = 1.0,
+}
+
+\setminted[julia]{
+    % julia-specific overrides go here if you ever want them
+}
+
+% Hyperlinks
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=juliablue,
+    citecolor=juliagreen,
+    urlcolor=juliapurple
+}
+
+% Figures
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+% Title Metadata
+\title{\textbf{Simulations and Dynamics Course Report}\\ \large Numerical Integration \& Nonlinear Dynamical Systems}
+\author{\textbf{Author Name} \\ Course Code: SD-401}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This will contain an abstract at some point.
+\end{abstract}
+
+\include{Problems/problem1.tex}
+\include{Problems/Problem2/problem2.tex}
+\include{Problems/Problem3/problem3}
+
+\end{document}

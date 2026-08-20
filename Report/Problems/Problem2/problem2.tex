@@ -1,0 +1,30 @@
+\section{Getting better with Vectors}
+\subsection{The shortest distance between two lines}
+Consider four points $A, B, C$ and $D$ described by vectors $\vec{r}_A, \vec{r}_B, \vec{r}_C, \vec{r}_D$.
+
+The shortest distance between two lines can be represented by the line segment that intersects both lines perpendicularly. We thus define two vectors that go through $\vec{r}_A$ and $\vec{r}_B$, and $\vec{r}_C$ and $\vec{r}_D$, with directions
+
+$$
+\vec{u} = \vec{r}_B - \vec{r}_A \\
+\vec{v} = \vec{r}_D - \vec{r}_C.
+$$
+
+A mutually perpendicular direction is identified using the cross product of these two directions
+
+$$
+\vec{n} = \vec{u} \times \vec{v}
+$$
+
+which we turn into a unit vector by dividing it by its magnitude.
+
+\begin{equation}
+    \hat{n} = \frac{\vec{u} \times \vec{v}}{|| \vec{u} \times \vec{v} ||}
+\end{equation}
+
+Two planes containing each of the lines are constructed, while constraint to being parallel to the other line (the line that is not contained within the plane). Since both the planes are parallel to the other lines, the vector $\vec{n}$ is the normal vector to both planes.
+
+To find the gap between these two planes, any point on the planes are chosen -- for example $\vec{r}_A$ and $\vec{r}_C$. A new vector $\vec{w} = \vec{r}_C - \vec{r}_A$ is drawn to connect them. To find the true distance between the two planes, the connecting vector is projected onto the perpendicular vector $\vec{n}$. Thus,
+
+\begin{equation}
+    d = |\vec{w} \cdot \vec{n}|.
+\end{equation}
