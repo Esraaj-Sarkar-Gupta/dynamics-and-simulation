@@ -28,3 +28,31 @@ To find the gap between these two planes, any point on the planes are chosen -- 
 \begin{equation}
     d = |\vec{w} \cdot \vec{n}|.
 \end{equation}
+
+\subsection{Fixed Structure Problem}
+Assume that points $A, B$ and $C$ are fixed to a structure, and all three are connected by massless rods to a ball and socket joint at each end, to point $D$. At point $D$ a force $\vec{F}$ is applied. In this section we attempt to find the tension in bar $AD$.
+
+Let the tension vectors in rods $AD$, $BD$, and $CD$ be $\vec{T}_1 = T_1 \hat\lambda_1$, $\vec{T}_2 = T_2 \hat\lambda_2$ and $\vec{T}_3 = T_3 \hat\lambda_3$ respectively. We may then write the equation
+
+\begin{equation}
+    T_1 \lambda_1 + T_2 \lambda_2 + T_3 \lambda_3 = \vec{F}
+\end{equation}
+
+A vector normal to the unit direction vectors $\hat\lambda_2$ and $\hat\lambda_3$ is constructed
+
+\begin{equation}
+    \vec{n} = \hat\lambda
+\end{equation}
+
+and the force balance equation is projected onto the vector along $\vec{n}$. Since, by definition, $\vec{n} \perp \hat\lambda_2, \hat\lambda_3$,
+
+\begin{equation}
+    T_1 \left(\vec{n} \cdot \hat\lambda_1 \right) = \vec{n} \cdot \vec{F}
+\end{equation}
+
+and therefore,
+
+\begin{equation}
+    T_1 = \frac{\left(\vec{n} \cdot \vec{F}\right)}{\left(\vec{n} \cdot \hat\lambda_2\right)}.
+\end{equation}
+

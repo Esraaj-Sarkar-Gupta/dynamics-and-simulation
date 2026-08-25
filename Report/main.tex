@@ -3,6 +3,7 @@
 % Page Layout - 2 cm margins on left and right
 \usepackage[a4paper, left=2cm, right=2cm, top=2.5cm, bottom=2.5cm]{geometry}
 \setlength{\parindent}{0pt}
+\usepackage{parskip}
 
 % Fonts (XeLaTeX-native, replaces inputenc/fontenc/lmodern)
 \usepackage{fontspec}
@@ -71,8 +72,13 @@
 This will contain an abstract at some point.
 \end{abstract}
 
-\include{Problems/problem1.tex}
-\include{Problems/Problem2/problem2.tex}
+% Homeworks 1
+\include{Problems/Problem1/problem1}
+\include{Problems/Problem2/problem2}
 \include{Problems/Problem3/problem3}
+
+% Homeworks 2
+\include{Problems/Problem6/problem_6}
+\include{Problems/Problem9/problem9}
 
 \end{document}
