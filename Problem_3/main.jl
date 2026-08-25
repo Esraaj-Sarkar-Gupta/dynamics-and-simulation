@@ -2,7 +2,7 @@ using DifferentialEquations
 using Plots
 using LinearAlgebra # Vector norms
 
-mkpath("figures")
+mkpath("Problem_3/figures")
 
 # Load dynamics and custom solver modules
 include("dynamics.jl")
@@ -40,7 +40,7 @@ plt_a = plot(x_dir, y_dir, z_dir,
     xlabel="x", ylabel="y", zlabel="z", 
     title="Part (a): Direct Euler Loop", legend=false, lw=0.7
 )
-savefig(plt_a, "figures/lorenz_direct.png")
+savefig(plt_a, "Problem_3/figures/lorenz_direct.png")
 
 
 # ===================================================
@@ -69,13 +69,13 @@ x_o = [u[1] for u in u_ode45_interp]
 plt_3d_comp = plot(x_e, y_e, z_e, label="Custom Euler (dt=0.001)", color=:red, lw=0.7)
 plot!(plt_3d_comp, sol_ode45, idxs=(1,2,3), label="ODE45 (DP5)", color=:blue, lw=0.7,
       title="Lorenz: Custom Euler vs ODE45 Trajectory", xlabel="x", ylabel="y", zlabel="z")
-savefig(plt_3d_comp, "figures/comparison_euler_vs_ode45_3d.png")
+savefig(plt_3d_comp, "Problem_3/figures/comparison_euler_vs_ode45_3d.png")
 
 # Plot 2: Time Series Comparison x(t) (Highlighting Chaotic Divergence)
 plt_time_comp = plot(t_e, x_e, label="Custom Euler", color=:red, lw=1.2)
 plot!(plt_time_comp, t_e, x_o, label="ODE45", color=:blue, ls=:dash, lw=1.2,
       title="x(t) Trajectory Divergence (Butterfly Effect)", xlabel="Time (s)", ylabel="x(t)")
-savefig(plt_time_comp, "figures/comparison_euler_vs_ode45_time.png")
+savefig(plt_time_comp, "Problem_3/figures/comparison_euler_vs_ode45_time.png")
 
 
 # =================================================================
@@ -108,7 +108,7 @@ plt_conv = plot(dt_range, errors_euler, xscale=:log10, yscale=:log10,
 # Overlay theoretical O(dt^1) reference slope
 plot!(plt_conv, dt_range, dt_range .* (errors_euler[end] / dt_range[end]), 
       label="Theoretical O(dt¹)", ls=:dash, color=:black, lw=1.5)
-savefig(plt_conv, "figures/euler_convergence.png")
+savefig(plt_conv, "Problem_3/figures/euler_convergence.png")
 
 
 # =====================================================
@@ -136,5 +136,5 @@ plt_tol = plot(target_tols, actual_errors, xscale=:log10, yscale=:log10,
 
 plot!(plt_tol, target_tols, target_tols, label="Ideal Error = Tolerance", 
       ls=:dash, color=:black, lw=1.5)
-savefig(plt_tol, "figures/ode45_accuracy_assessment.png")
+savefig(plt_tol, "Problem_3/figures/ode45_accuracy_assessment.png")
 println("We're done here!")
