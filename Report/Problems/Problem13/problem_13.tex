@@ -278,6 +278,8 @@ One can clearly visualize that the solutions are far apart. Given the nature of 
     \end{tabular}
 \end{table}
 
+\subsection{Evaluating Stability : Numerical Simulations}
+
 To evaluate the stability of the discovered fixed points, one may simulate the system with initial positions set to the fixed points and an arbitrarily small velocities to simulate a perturbation. Observing the behaviour of the system (converging back to the fixed point/ diverging from the fixed point) allows one to assess the stability.
 
 In the system simulate here, three distinct fixed points were discovered. The system was simulated (as done above) using TSit5 from the fixed points with varying perturbations. It is discovered that two of the three fixed points are unstable. Following their respective perturbations, all three masses converge at the singular stable fixed point of the system.
@@ -300,4 +302,89 @@ In the system simulate here, three distinct fixed points were discovered. The sy
      \end{subfigure}
 
     \caption{Stability of Discovered Fixed Points}
+\end{figure}
+
+\subsection{Evaluating Stability : Jacobians}
+Write the equations of motion as $\dot{z}=f(z)$, with $z=[x,y,v_x,v_y]^\top$. A fixed point $z^*=[x^*,y^*,0,0]^\top$ satisfies $f(z^*)=0$. To assess its stability, we ask whether a small disturbance in position or velocity grows or decays with time.
+
+The Jacobian records how each component of $f$ changes when a state variable changes. At the fixed point, its entries are
+\begin{equation}
+    J_{ij}=\left.\frac{\partial f_i}{\partial z_j}\right|_{z=z^*}.
+\end{equation}
+For a small disturbance $\eta=z-z^*$, a first-order approximation gives
+\begin{equation}
+    \dot{\eta}=f(z^*+\eta)\approx f(z^*)+J\eta=J\eta.
+\end{equation}
+Thus, close to the fixed point, we can study a linear system instead of the full nonlinear equations. Here, $J$ is a $4\times4$ matrix obtained from the full equations of motion, including the damping terms.
+
+\begin{minted}{julia}
+function rhs(u)
+    du = Vector{eltype(u)}(undef, 4)
+    spring_damper_mass_system!(du, u, params, 0.0)
+    return du
+end
+
+for (i, fp) in enumerate(fixed_points)
+    # Compute 4x4 Jacobian Matrix at u* via Forward-Mode AD
+    J = ForwardDiff.jacobian(rhs, fp)
+    
+    # Calculate Eigenvalues
+    λ = eigvals(J)
+    
+    # Stability criterion: all Re(λ) < 0
+    is_stable = all(real.(λ) .< 0.0)
+    classification = is_stable ? "Asymptotically Stable (Sink)" : "Unstable (Saddle/Source)"
+    
+    for (j, val) in enumerate(λ)
+        re, im = round(real(val), digits=4), round(imag(val), digits=4)
+        sign_str = im >= 0 ? "+" : "-"
+        println("    λ_$(j) = $re $sign_str $(abs(im))i")
+    end
+end
+\end{minted}
+
+For an eigenvector $q$ of $J$, the associated disturbance in this linear approximation has the form
+\begin{equation}
+    Jq=\lambda q, \qquad \eta(t)=a e^{\lambda t}q,
+\end{equation}
+where $a$ sets the initial disturbance size. The real part of $\lambda$ determines growth or decay, while a nonzero imaginary part indicates oscillation. For a smooth system, this gives the following local stability criteria:
+\begin{itemize}
+    \item If all eigenvalues have negative real parts, small disturbances decay and the fixed point is locally asymptotically stable.
+    \item If any eigenvalue has a positive real part, some disturbances grow and the fixed point is unstable.
+    \item If no eigenvalue has a positive real part, but at least one has zero real part, linearization alone is inconclusive for the nonlinear system.
+\end{itemize}
+These criteria describe behaviour near an equilibrium; they do not determine the response to large disturbances.
+
+In the Julia calculation, three integer class seeds were identified. The cluster centroids were extended to states with zero velocity, and \texttt{ForwardDiff.jacobian} and \texttt{eigvals} were used to evaluate the Jacobian and its eigenvalues. Table~\ref{tab:p13_jacobian_stability} summarizes the supplied run, with positions rounded to four decimal places. All three reported states have $(v_x^*,v_y^*)=(0,0)$~m/s.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Reported eigenvalues and stability classifications from the Julia run.}
+    \label{tab:p13_jacobian_stability}
+    \begin{tabular}{c c c l}
+        \hline
+        \textbf{Point} & $(x^*,y^*)$ (m) & \textbf{Eigenvalues} ($\mathrm{s}^{-1}$) & \textbf{Run classification} \\
+        \hline
+        1 & $(6.7800,4.1553)$ & $-0.9954\pm1.4640i$ & Asymptotically stable \\
+          & & $-0.2046\pm2.0645i$ & (sink) \\
+        \hline
+        2 & $(2.0000,10.0000)$ & $-615787.3732,\;615787.1931$ & Unstable (saddle/source) \\
+          & & $-1.1099\pm1.9408i$ & See qualification below \\
+        \hline
+        3 & $(10.9461,11.2981)$ & $-3.3799,\;2.2482$ & Unstable (saddle/source) \\
+          & & $-0.6341\pm2.1537i$ & \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Point 1 has only negative real parts, indicating decaying oscillations towards the equilibrium. Point 3 has a positive real eigenvalue, $2.2482$, as well as eigenvalues with negative real parts, indicating a saddle instability.
+
+Point 2 requires care: its reported position is effectively anchor A, $(2,10)$. At the anchor, the spring length is zero and the unit direction vector used in the force calculation is undefined. The very large Jacobian entries (of order $10^{11}$) and eigenvalues at the nearby numerical point therefore do not establish the stability of a valid equilibrium at the anchor. Although the code reports it as unstable, this candidate must be checked separately, including its force residual and the validity of the force model there.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Problems/Problem13/figures/fixed_points_analysis.png}
+    \caption{Simulated mass trajectory and clustered candidate fixed points from the Julia run.}
+    \label{fig:p13_fixed_points_analysis}
 \end{figure}
