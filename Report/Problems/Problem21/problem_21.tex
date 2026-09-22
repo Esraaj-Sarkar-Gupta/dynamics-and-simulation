@@ -1,0 +1,200 @@
+\newcommand{\icap}{\hat{\imath}}
+\newcommand{\jcap}{\hat{\jmath}}
+
+\section{Simple Pendulum: Deriving the Equations of Motion}
+In this problem, several methods of deriving the laws of motion of a simple non-linear pendulum are explored. We set up the problem as a point mass $m$ hanging from a string of length $l$ affixed at a point $(r,\theta) = (0,0)$, making an angle $\theta$ with the normal.
+
+Two unit vectors are defined-- $\hat\lambda_r$ acting along the string, pointing away from the origin, and $\hat\lambda_\theta$ acting perpendicular to $\hat\lambda_r$, along the direction of the resultant tangential motion.
+
+\begin{align}
+    \vec{r} &= r\hat\lambda_r = r\left(\sin\theta \icap - \cos\theta \jcap\right) \\
+    \frac{1}{r}\frac{\partial \vec{r}}{\partial \theta} &= \hat\lambda_\theta \left(\cos\theta \icap + \sin\theta \jcap\right)
+    \label{eq:problem21:the unit vectors}
+\end{align}
+
+\subsection{Using Linear Momentum and Eliminating the Constraint Force using Vector Algebra}
+From Newton's Second Law of Motion, one may assert that
+
+\begin{equation}
+    m\vec{a} = \sum \vec{F} = \vec{T} + m\vec{g}.
+\end{equation}
+
+Resolving forces along the directions $\hat\lambda_\theta$ and $\hat\lambda_r$,
+
+\begin{equation}
+    \sum \vec{F} = m(l\ddot\theta) \hat{e}= -T \hat\lambda_r + mg\left(-\sin \hat\lambda_\theta + \cos \hat\lambda_r\right)
+    \label{eq:problem21:newton's second law of motion}
+\end{equation}
+
+and the constraint forces cancel out $-T + mg\cos\theta = 0$. Thus, the expression that remains is
+
+\begin{align}
+    ml\ddot\theta + mg\sin\theta &= 0 \nonumber \\
+    \implies \ddot\theta + \frac{g}{l}\sin\theta &= 0.
+\end{align}
+
+\subsection{Linear Momentum dotted with $\hat\lambda_\theta$}
+The equation from Newton's Second Law of Motion is rexpressed and projected along the unit vector $\hat\lambda_\theta$. By definition $\hat\lambda_\theta \cdot \hat\lambda_r = 0$. Thus, Eq. \ref{eq:problem21:newton's second law of motion} simplifies to
+
+\begin{align}
+    \hat\lambda_\theta \cdot m\vec{a} &= \hat\lambda_\theta \cdot m\vec{g} \nonumber \\
+    &= -g\sin\theta
+\end{align}
+
+resulting in the expression
+
+\begin{equation}
+    a = -\frac{g}{l}\sin\theta.
+\end{equation}
+
+\subsection{Angular Momentum}
+Rotational mechanics provides a relation between angular momentum $L$ and linear momentum $p$
+
+\begin{equation}
+    \vec{L} = \vec{r} \times \vec{p}
+\end{equation}
+
+and a relation between Torque $\tau$ and angular momentum
+
+\begin{equation}
+    \vec{\tau} = \frac{d\vec{L}}{dt}.
+\end{equation}
+
+In the system defined, the radius vector is given By
+
+\begin{equation}
+    \vec{r} = l\hat\lambda_r
+\end{equation}
+
+and the linear momentum $p = mv$ is given By
+
+\begin{equation}
+    \vec{p} = ml\dot{\theta} \hat\lambda_\theta.
+\end{equation}
+
+Thus, angular momentum is given by the expression
+
+\begin{align}
+    \vec{L} &= ml^2\dot\theta \left(\hat\lambda_r \times \hat\lambda_\theta \right) \nonumber \\
+    &= ml^2\dot\theta \hat{k}.
+    \label{eq:problem21:angular momentum}
+\end{align}
+
+Differentiating this expression to get the Torque vector,
+
+\begin{equation}
+    \vec{\tau} = ml^2\ddot\theta\hat{k}.
+\end{equation}
+
+From the laws of rotational mechanics, one may assert
+
+\begin{equation}
+    \vec{\tau} = \vec{r} \times \vec{F} 
+\end{equation}
+
+and in this system,
+
+\begin{align}
+    \vec{r} \times \sum\vec{F} &=
+    (l\hat\lambda_r) \times \left(T\hat\lambda_r - mg\sin\theta \hat\lambda_\theta - mg\cos\theta \hat\lambda_r \right)
+    \nonumber \\
+    \implies \dot{\vec{L}} &= -mgl \sin\theta \hat{k}
+    \label{eq:problem21:torque}
+\end{align}
+
+From Eq. \ref{eq:problem21:angular momentum} and Eq. \ref{eq:problem21:torque}, the relation
+
+\begin{equation}
+    ml^2 \dot\theta \hat{k} = mgl \sin\theta \hat{k}
+\end{equation}
+
+can be inferred, which simplifies to the equation of motion of the pendulum.
+
+\subsection{Conservation of Energy}
+From the Law of Conservation of Energy, one may infer that
+
+\begin{equation}
+    E = T + V = \text{const}
+\end{equation}
+
+where $T$ an $V$ are the kinetic and potential energies respectively. For the system defined in this problem,
+
+\begin{equation}
+    T = \frac{1}{2}mv^2 = \frac{m(l\dot)^2}{2}
+    \label{eq:problem21:kinetic energy}
+\end{equation}
+
+and
+
+\begin{equation}
+    V = -mg (l\cos\theta).
+\end{equation}
+
+Differentiating the total energy with respect to time, one gets the expression
+
+\begin{align}
+    \frac{dE}{dt} &= \frac{1}{2}ml^2\left(2\dot\theta \ddot\theta\right) + mgl\dot\theta\sin\theta = 0 \nonumber \\
+    &\implies \ddot\theta + \frac{g}{l}\sin\theta = 0
+\end{align}
+
+which is the governing equation of motion of the system.
+
+\subsection{Power Balance}
+The expression for power is $P = \sum\vec{F} \cdot \vec{r}$, and in this system
+
+\begin{equation}
+    \sum\vec{F} = \vec{T} + m\vec{g}.
+\end{equation}
+
+The power components can be broken down into the tension power---the constraint power that evaluates to 0
+
+\begin{align}
+    P_T &= \vec{T} \cdot \vec{v} \nonumber \\
+    &= \left( -T \hat\lambda_r \right) \cdot \left(l\dot\theta \hat\lambda_\theta\right) \nonumber \\
+    &= 0,
+\end{align}
+
+and the gravitational power
+
+\begin{align}
+    P_G &= m\vec{g} \cdot \vec{v} \nonumber \\
+    &= -mg\sin\theta \hat\lambda_\theta \cdot l\dot\theta \hat\lambda_\theta \nonumber \\
+    &= -mgl\dot\theta \sin\theta.
+\end{align}
+
+Total power is given by the expression
+
+\begin{equation}
+    \frac{dT}{dt} = \mathcal{P} = P_G + 0.
+\end{equation}
+
+The kinetic energy of the system has been given in Eq. \ref{eq:problem21:kinetic energy}. Simplifying this equality results in the governing equation of motion of the system.
+
+\subsection{Lagrangian Mechanics}
+The Euler-Lagrange equation from Lagrangian mechanics is given below
+
+\begin{equation}
+    \frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{q}} \right) - \frac{\partial \mathcal{L}}{\partial q} = 0
+\end{equation}
+
+where $q = \theta$ in the context of this system. The Lagrangian is given by the expression
+
+\begin{equation}
+    \mathcal{L} = T - V
+\end{equation}
+
+and the expressions for kinetic energy $T$ and potential energy $V$ have already been discussed in this problem. Solving for Euler-Lagrange equation witb these expressions---Evaluating the time derivative of the generalized momentum (the first term of the Euler-Lagrange equation):
+
+\begin{align}
+    \frac{\partial \mathcal{L}}{\partial \dot{\theta}} &= \frac{\partial}{\partial \dot{\theta}} \left( \frac{1}{2}ml^2\dot{\theta}^2 + mgl\cos\theta \right) = ml^2\dot{\theta} \nonumber \\
+    \frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{\theta}} \right) &= \frac{d}{dt} \left( ml^2\dot{\theta} \right) = ml^2\ddot{\theta}.
+\end{align}
+
+Next, evaluating the generalized force (the second term of the Euler-Lagrange equation):
+
+\begin{align}
+    \frac{\partial \mathcal{L}}{\partial \theta} &= \frac{\partial}{\partial \theta} \left( \frac{1}{2}ml^2\dot{\theta}^2 + mgl\cos\theta \right) \nonumber \\
+    &= -mgl\sin\theta
+\end{align}
+
+Substituting these back into the Euler-Lagrange equation yields \(ml^2\ddot{\theta} - (-mgl\sin\theta) = 0\), which simplifies to the governing equation of motion.
