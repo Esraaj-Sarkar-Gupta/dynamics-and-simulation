@@ -1,0 +1,156 @@
+\section{Pendulum Numerics: Differential Algebraic Equations}
+
+In this problem a pendulum is setup using \textit{Differential Algebraic Equations}(DAEs) using only Cartesian Coordinates. For a pendulum of length $l$ and mass at the point $P(x,y)$, the kinematic constraint is given by
+
+\begin{equation}
+    g(\vec{X}) = x^2 + y^2 - l^2 = 0
+    \label{problem23:eq:kinematic constraint}
+\end{equation}
+
+since $l^2 = x^2 + y^2$. The time derivatives of Eq. \ref{problem23:eq:kinematic constraint} are
+
+\begin{align}
+    \frac{d}{dt}g(\vec{X}) = x\dot{x} + y\dot{y} = 0 \\
+    \frac{d^2}{dt^2}g(\vec{X}) = \dot{x}^2 + \dot{y}^2 + x\ddot{x} + y\ddot{y}
+\end{align}
+
+Applying Newton's Second Law of Motion, force balance equations are defined along the basis vectors. In analytical mechanics, if a system is constraint by a position constraint $g(\vec{X}) = 0$, the constraint force $F_c$ must be perpendicular to the allowed surface of motion. The norma, direction to any surface is given by the gradient of its equation $\nabla g(\vec{X})$.
+
+\begin{align}
+    m\ddot{x} = -\lambda x \\
+    m\ddot{y} = -mg - \lambda y
+\end{align}
+
+This result holds for ideal holonomic geometric constraints; the proof for which will be explored later in this document. For now, one may get the same result by simply writing out Newton's Second Law of Motion in vector form.
+
+\begin{equation}
+    -mg \jcap - \frac{T \left(x\icap + y\jcap\right)}{\sqrt{x^2 + y^2}} =
+    m(\ddot{x} \icap + \ddot{y} \jcap)
+\end{equation}
+
+which, written as two scalar equations is
+
+\begin{align}
+    m\ddot{x} + \frac{T}{l}x = 0 \\
+    m\ddot{y} + \frac{T}{l}y = mg.
+\end{align}
+
+This problem can be solved using $\lambda = \frac{T}{l}$, but instead, $T$ is chosen as an unknown, and purely for convinience.
+
+\begin{equation}
+    \begin{pmatrix}
+        m & 0 & \frac{x}{l} \\
+        0 & m & \frac{y}{l} \\
+        x & y & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+        \ddot{x} \\
+        \ddot{y} \\
+        T
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        0  \\
+        mg \\
+        -\left(\dot{x}^2 + \dot{y}^2\right)
+    \end{pmatrix}
+\end{equation}
+
+The system is defined in Julia to be evaluated numerically.
+
+\begin{minted}{julia}
+# Dynamics and Simulation, Esraaj 2026
+module SinglePendulum
+using LinearAlgebra
+using DifferentialEquations
+export PenduParameters, pendu_polar!, pendu_cartesian!
+
+struct PenduParameters
+    m :: Float64
+    g :: Float64
+    l :: Float64
+end
+
+function pendu_cartesian!(du, u, p::PenduParameters, t)
+    x, y, vx, vy = u
+    # Build the matrix equation from DAE
+    # Refer to report for derivation
+    A = [p.m   0.0   x/p.l;
+         0.0  p.m    y/p.l;
+         x    y     0]
+    b = [
+        0.0,
+        p.m * p.g,
+        -(vx^2 + vy^2)
+    ]
+    # Solve
+    Z = A\b
+    ax, ay, T = Z[1], Z[2], Z[3]
+    # Update derivative state in-place
+    du[1] = vx
+    du[2] = vy
+    du[3] = ax
+    du[4] = ay
+    return nothing
+end
+
+# Sample system derived for and written in polar coordinates
+# Exact solution
+function pendu_polar!(dw, w, p::PenduParameters, t)
+    ...
+end
+end # module
+\end{minted}
+
+In the full-state formulation of the DAE system, this same setup is given by the matrix equation 
+
+\begin{equation}
+    \begin{pmatrix}
+        1 & 0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 & 0 \\
+        0 & 0 & m & 0 & \frac{x}{l} \\
+        0 & 0 & 0 & m & \frac{y}{l} \\
+        0 & 0 & x & y & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+        \dot{x} \\
+        \dot{y} \\
+        \dot{v}_x \\
+        \dot{v}_y \\
+        T
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        v_x \\
+        v_y \\
+        0   \\
+        mg  \\
+        -\left(v_x^2 + v_y^2\right)
+    \end{pmatrix}
+\end{equation}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{Problems/Problem23/figures/pendulum_snapshot.png}
+    \caption{Pendulum Animation Snapshot -- DAE Solution}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.85\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem23/figures/pendulum_motion_and_drift.png}
+        \caption{Drift in Position Error}
+        \label{fig:top_sub}
+    \end{subfigure}
+
+    \begin{subfigure}{0.85\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem23/figures/pendulum_drift.png}
+        \caption{Pendulum Motion: Numerical vs Extact Solutions}
+        \label{fig:bottom_sub}
+    \end{subfigure}
+    
+    \caption{Gauging growing errors from the numerical DAE solution}
+    \label{fig:stacked_main}
+\end{figure}

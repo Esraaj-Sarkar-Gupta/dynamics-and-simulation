@@ -1,0 +1,99 @@
+\section{Pendulum with Awkward Parametrization}
+In this problem the same system is solved for, but instead of using the angle of the pendulum $\theta$ to parametrize the system, the coordinate $y$ is used instead. This is permissible since any system with a single degree of freedom (such as this one) can be parametrized with any single variable that describes the system.
+
+The kinematic constrait $x^2 + y^2 = l^2$ allows one to parametrized $y$ in $x$.
+
+\begin{equation}
+    y(x) = \sqrt{l^2 - x^2}
+\end{equation}
+
+In order to derive the equations of motion of this system, one may use the Euler-Lagrange equations, which necessitates that one finds the expressions for the  total kinetic energy $\mathcal{T}$ and potential energy $\mathcal{V}$ of this system.
+
+\begin{align}
+    \mathcal{T} &= \frac{1}{2}m
+            \left( 
+                \frac{-x}{\sqrt{l^2 - x^2}}
+                + \dot{x}^2
+            \right) \\
+    \mathcal{V} &= -mgy
+\end{align}
+
+Keep in mind that since $v^2 = \dot{x}^2 + \dot{y}^2$ and $\dot{y} = \sqrt{l^2 - x^2}$,
+
+\begin{equation}
+    \mathcal{T} =
+    \frac{1}{2}m \left( \frac{\dot{x}^2 \left(l^2 - x^2\right) + \dot{x}x}{\left(l^2 - x^2 \right)} \right) =
+    \frac{1}{2}m \left(\frac{\dot{x}^2l^2}{\left(l^2 - x^2 \right)} \right)
+\end{equation}
+
+and
+\begin{equation}
+    \mathcal{V} = \frac{mgx}{\sqrt{l^2 - x^2}}
+\end{equation}
+
+And from Eq. \ref{eq:Euler Lagrange Equation}, we know $\partial_q\mathcal{L} - \frac{d}{dt}\partial_{\dot{q}}\mathcal{L}$ where $\mathcal{L} = \mathcal{T} - \mathcal{V}$. Thus,
+
+\begin{equation}
+    \mathcal{L} = 
+    \frac{1}{2}m \left(\frac{\dot{x}^2l^2}{\left(l^2 - x^2 \right)} \right) - mg\sqrt{l^2 - x^2}.
+\end{equation}
+
+Expression this system in the Euler Lagrange Equation \ref{eq:Euler Lagrange Equation},
+
+\begin{align}
+    \frac{\partial \mathcal{L}}{\partial x} &= 
+    \frac{m l^2 x \dot{x}^2}{(l^2 - x^2)^2} - \frac{mgx}{\sqrt{l^2 - x^2}} \\
+    \frac{d}{dt}\left(\frac{\partial \mathcal{L}}{\partial \dot{x}}\right) &=
+    \frac{d}{dt} \left[ \frac{m l^2 \dot{x}}{l^2 - x^2} \right] = 
+    ml^2 \left( \frac{\ddot{x}\left(l^2 - x^2\right) - \dot{x} \left(-2x\dot{x}\right)}{\left(l^2 - x^2 \right)^2} \right)
+\end{align}
+
+The resulting second order differential equation from $\partial_q\mathcal{L} - \frac{d}{dt}\partial_{\dot{q}}\mathcal{L}$ is
+
+\begin{equation}
+    \ddot{x} = - \frac{x\dot{x}^2}{\left(l^2 - x^2\right)} - \frac{gx}{l^2}\sqrt{l^2 - x^2}
+\end{equation}
+
+is solved numerically (again, using a fifth order solver, like we always do) in Julia.
+
+\begin{minted}{julia}
+module AwkwardPendulumSystem
+
+export PendulumParams, pendulum_awkward_x!, pendulum_polar!
+
+struct PendulumParams
+    m::Float64
+    g::Float64
+    l::Float64
+end
+
+# Awkward 2nd-order ODE parameterized by horizontal coordinate x(t)
+function pendulum_awkward_x!(du, u, p, t)
+    x, x_dot = u
+    g, l     = p.g, p.l   
+    denom = l^2 - x^2  
+    du[1] = x_dot
+    du[2] = -(x * x_dot^2) / denom - (g * x / l^2) * sqrt(denom)
+end
+# Reference Polar ODE in θ(t)
+function pendulum_polar!(dw, w, p, t)
+    θ, ω = w   
+    dw[1] = ω
+    dw[2] = -(p.g / p.l) * sin(θ)
+end
+end # module
+\end{minted}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\linewidth]{Problems/Problem24/figures/awkward_pendulum_snapshot.png}
+    \caption{Spatial configuration snapshot of the planar pendulum at $t = 10\,\text{s}$. The Cartesian DAE numerical bob position (blue) is plotted alongside the exact polar reference state (red) on the nominal constraint manifold $x^2 + y^2 = l^2$.}
+    \label{fig:dae_snapshot}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{Problems/Problem24/figures/awkward_motion_and_error.png}
+    \caption{Time-domain analysis of the Cartesian DAE numerical integration over $t \in [0, 200]\,\text{s}$. \textbf{Top:} Angular trajectory $\theta(t) = \arctan(x, y)$ showing agreement with the exact polar reference. \textbf{Bottom:} Unbounded exponential growth of the kinematic length constraint violation $|r(t) - l|$ due to uncorrected numerical drift off the constraint manifold.}
+    \label{fig:dae_motion_and_drift}
+\end{figure}

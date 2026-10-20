@@ -1,0 +1,306 @@
+\section{Inverted Pendulum with a Shaking Base}
+In this problem the following system is considered: An inverted pendulum is affixed on a point that is accelerated predictably along the vertical axis $\ddot{y}(t) = a(t)$. The base is considered to have a mass $M$. An origin is selected by picking a point on the line along which mass $M$ oscillates.
+
+\subsection{Deriving Equations of Motion using the Lagrangian Formalism}
+
+\subsubsection{Consider a point mass $m$ at the end of a rod $l$.}
+The coordinates of the point mass are given by $(l\sin\theta, y + l\cos\theta)$ where $\theta$ is the angle the inverted pendulum makes with the normal (the vertical). Thus, the total kinetic energy of the system is given by
+
+\begin{equation}
+    \mathcal{T} = \mathcal{T}_m + \mathcal{T}_M
+\end{equation}
+
+where
+
+\begin{align}
+    \mathcal{T}_m &= \frac{1}{2}m \left(
+        (l\cos(\theta) \dot\theta)^2 +
+        \left( \dot{y} - l\sin(\theta) \dot\theta \right)^2
+        \right) =
+        \frac{1}{2}m \left( l^2\dot\theta^2 + \dot{y}^2 - 2l\dot\theta \sin(\theta)\dot{y} \right) \\
+    \mathcal{T}_M &= \frac{1}{2}M \dot{y}^2.
+\end{align}
+
+And the total potential energy of the system is given by
+
+\begin{equation}
+    \mathcal{V} = mg\left(y + l\cos\theta\right) + Mgy.
+\end{equation}
+
+Thus, the Lagrangian $\mathcal{L} = \mathcal{T} - \mathcal{V}$ is constructed; the Euler-Lagrange equation is asserted.
+
+\begin{align}
+    \frac{\partial \mathcal{L}}{\partial \theta} &=
+        m \left(
+            gl\sin\theta - l\dot\theta \dot{y}\cos\theta
+        \right) \\
+    \frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{\theta}} \right) &=
+        \frac{d}{dt} \left(
+            ml^2\dot{\theta} - ml\dot{y}\sin\theta
+        \right) \nonumber \\
+        &= ml^2\ddot\theta - ml\left( \ddot{y}\sin\theta + \dot{y}\dot\theta\cos\theta \right)
+\end{align}
+
+Subtracting $\frac{\partial \mathcal{L}}{\partial \theta}$ from $\frac{d}{dt}\left(\frac{\partial \mathcal{L}}{\partial \dot{\theta}}\right) = 0$ leads to the cancellation of $ml\dot{y}\dot{\theta}\cos\theta$:
+
+\begin{equation}
+    ml^2\ddot{\theta} - ml\ddot{y}\sin\theta - mgl\sin\theta = 0 \implies \ddot{\theta} = \frac{g + a(t)}{l}\sin\theta
+\end{equation}
+
+This second order differential equation is solved using a fifth over solver on Julia
+
+\begin{minted}{julia}
+module System
+export PendulumParams, inverted_pendulum!
+# Base.@kwdef to allow keyword instantiation with defaults
+Base.@kwdef struct PendulumParams
+    l::Float64 = 1.0
+    g::Float64 = 9.81
+    a::Function      # Base acceleration a(t)
+    y_b::Function    # Base position y_b(t) (needed for rendering)
+end
+# In-place ODE function
+function inverted_pendulum!(du, u, p, t)
+    θ = u[1]
+    ω = u[2]
+    du[1] = ω
+    # EOM: theta_ddot = (1/l) * (g + a(t)) * sin(theta)
+    du[2] = (1.0 / p.l) * (p.g + p.a(t)) * sin(θ)
+    return nothing
+end
+end
+\end{minted}
+
+The shaking of the base $M$ can be modeled using a sinusoid.
+
+\begin{equation}
+    y(t) = A \cos(\omega t)
+\end{equation}
+
+\begin{minted}{julia}
+# Define the driving base kinematics (High frequency Kapitza stabilization)
+amp_drive = 0.05    # Amplitude of shaking (m)
+omega_drive = 60.0  # Frequency of shaking (rad/s)
+# y_b(t) = A * cos(ω * t)
+# a(t) = ÿ_b(t) = -A * ω^2 * cos(ω * t)
+y_b_func(t) = amp_drive * cos(omega_drive * t)
+a_func(t)   = -amp_drive * (omega_drive^2) * cos(omega_drive * t)
+\end{minted}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem29/figures/trajectory.png}
+        \caption{Angular trajectory $\theta(t)$ over time}
+        \label{fig:kapitza_trajectory}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem29/figures/pendulum_snapshot.png}
+        \caption{System snapshot at $t = 2.50\,\text{s}$}
+        \label{fig:kapitza_snapshot}
+    \end{subfigure}
+    \caption{Numerical solution of the inverted pendulum with a vertically oscillating base. \textbf{(a)} Time-domain response of the angular position $\theta(t)$. \textbf{(b)} Spatial orientation showing the rigid rod, bob, and harmonically driven base.}
+    \label{fig:kapitza_side_by_side}
+\end{figure}
+
+\subsubsection{Consider a uniform mass of mass $m$ and length $l$}
+In this section, instead of a system with a point mass at the end of a rod of length $l$, a system with a continuous mass is considered instead.
+
+Using \textbf{Konig's Theorem}, it is asserted that the total kinetic energy $\mathcal{T}_m$ of a continuous rigid body is decomposed into the translational kinetic energy of its center of mass (COM) plus the rotational kinetic energy about the COM.
+
+\begin{equation}
+    \mathcal{T}m = \mathcal{T}_\text{COM} + \mathcal{T}_\text{rot, COM}
+\end{equation}
+
+Assuming a uniform mass distribution, one may assert that the COM is $\frac{l}{2}$ away from the fixed joint of the rod.
+
+\begin{equation}
+    (x_\text{COM}, y_\text{COM}) = \left( \frac{l}{2}\sin\theta, y + \frac{l}{2}\cos\theta \right)
+\end{equation}
+
+By taking the first derivatives of the coordinates of the COM of the mass,
+
+\begin{align}
+    \dot{x}_{\text{COM}} &= \frac{l}{2}\dot{\theta}\cos\theta \\
+    \dot{y}_{\text{COM}} &= \dot{y} - \frac{l}{2}\dot{\theta}\sin\theta
+\end{align}
+
+one may find the translational kinetic energy of the rod.
+
+\begin{equation}
+    \mathcal{T}_{\text{COM}} = 
+        \frac{1}{2}m \left( \dot{x}{\text{COM}}^2 + \dot{y}_{\text{COM}}^2 \right) =
+        \frac{1}{2}m \left( \frac{l^2}{4}\dot{\theta}^2 + \dot{y}^2 - l\dot{y}\dot{\theta}\sin\theta \right)
+\end{equation}
+
+The moment of inertia of a uniform thin rod about its center of mass is $I_\text{COM} = \frac{1}{12}ml^2$. The rotational kinetic energy relative to the COM is:
+
+\begin{equation}
+    \mathcal{T}_{\text{rot, COM}} =
+    \frac{1}{2}I_{\text{COM}}\dot{\theta}^2 =
+    \frac{1}{2}\left(\frac{1}{12}ml^2\right)\dot{\theta}^2 =
+    \frac{1}{24}ml^2\dot{\theta}^2
+\end{equation}
+
+Applying König's theorem, summing both terms yields the total kinetic energy of the rod:
+\begin{align}
+    \mathcal{T}_m &=
+        \frac{1}{2}m\left( \frac{l^2}{4}\dot{\theta}^2 + \dot{y}^2 - l\dot{y}\dot{\theta}\sin\theta \right) + \frac{1}{24}ml^2\dot{\theta}^2 \\
+        &= \frac{1}{2}m\dot{y}^2 - \frac{1}{2}ml\dot{y}\dot{\theta}\sin\theta + \frac{1}{6}ml^2\dot{\theta}^2
+\end{align}
+
+Taking potential energy evaluated at the COM:
+\begin{equation}
+    \mathcal{V} = mg\left(y + \frac{l}{2}\cos\theta\right) + Mgy
+\end{equation}
+
+Constructing the Lagrangian $\mathcal{L} = \mathcal{T} - \mathcal{V}$ where $\mathcal{T} = \mathcal{T}_m + \mathcal{T}_M$:
+
+\begin{equation}
+\mathcal{L} = \frac{1}{2}(M+m)\dot{y}^2 - \frac{1}{2}ml\dot{y}\dot{\theta}\sin\theta + \frac{1}{6}ml^2\dot{\theta}^2 - (M+m)gy - \frac{1}{2}mgl\cos\theta
+\end{equation}
+
+Evaluating the partial derivatives with respect to $\theta$ and $\dot{\theta}$:
+
+\begin{align}
+\frac{\partial \mathcal{L}}{\partial \theta} &= \frac{1}{2}mgl\sin\theta - \frac{1}{2}ml\dot{y}\dot{\theta}\cos\theta \\
+\frac{\partial \mathcal{L}}{\partial \dot{\theta}} &= \frac{1}{3}ml^2\dot{\theta} - \frac{1}{2}ml\dot{y}\sin\theta
+\end{align}
+
+Taking the total time derivative of $\frac{\partial \mathcal{L}}{\partial \dot{\theta}}$:
+
+\begin{equation}
+    \frac{d}{dt}\left(\frac{\partial \mathcal{L}}{\partial \dot{\theta}}\right) =
+    \frac{d}{dt}\left( \frac{1}{3}ml^2\dot{\theta} - \frac{1}{2}ml\dot{y}\sin\theta \right) =
+    \frac{1}{3}ml^2\ddot{\theta} - \frac{1}{2}ml\left( \ddot{y}\sin\theta + \dot{y}\dot{\theta}\cos\theta \right)
+\end{equation}
+
+\begin{equation}
+    \frac{1}{3}ml^2\ddot{\theta} = \frac{1}{2}ml\left( g + \ddot{y}(t) \right) \sin\theta
+\end{equation}
+
+Multiplying through by $\frac{3}{ml^2}$ and substituting $\ddot{y}(t) = a(t)$ yields the final analytical equation of motion for a uniform rigid rod
+
+\begin{equation}
+    \ddot{\theta} = \frac{3}{2}\frac{g + a(t)}{l}\sin\theta
+\end{equation}
+
+\begin{minted}{julia}
+# Uniform Rod Inverted Pendulum: theta_ddot = (3/2l) * (g + a(t)) * sin(theta)
+function inverted_pendulum_rod!(du, u, p, t)
+    θ = u[1]
+    ω = u[2]
+
+    du[1] = ω
+    du[2] = (1.5 / p.l) * (p.g + p.a(t)) * sin(θ)
+    
+    return nothing
+end
+\end{minted}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem29/figures/continuous_mass/trajectory.png}
+        \caption{Angular trajectory $\theta(t)$ over time}
+        \label{fig:kapitza_trajectory}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem29/figures/continuous_mass/pendulum_snapshot.png}
+        \caption{System snapshot at $t = 2.50\,\text{s}$}
+        \label{fig:kapitza_snapshot}
+    \end{subfigure}
+    \caption{Numerical solution of the inverted pendulum with a vertically oscillating base and a continuous mass $m$.}
+    \label{fig:kapitza_side_by_side}
+\end{figure}
+
+\subsection{Special Case: An inverted pendulum at a stable point}
+One may show, using simulations that the pendulum can be stable when upright.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem29/figures/stationary/trajectory.png}
+        \caption{Angular trajectory $\theta(t)$ over time}
+        \label{fig:kapitza_trajectory}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Problems/Problem29/figures/stationary/pendulum_snapshot.png}
+        \caption{System snapshot at $t = 2.50\,\text{s}$}
+        \label{fig:kapitza_snapshot}
+    \end{subfigure}
+    \caption{Numerical solution of the inverted pendulum with a vertically oscillating base in the special case that the pendulum is perfectly upright and stable.}
+    \label{fig:kapitza_side_by_side}
+\end{figure}
+
+\subsection{Using DAEs to Solve for the System}
+
+To model the system in unconstrained Cartesian coordinates without assuming minimal generalized coordinates, we enforce position constraints using Lagrange multipliers.
+
+For a point mass $m$ at $(x, y)$ connected to a vertically driven pivot $(0, y_b(t))$, the kinematic distance constraint is
+
+\begin{equation}
+    g(x, y, t) = x^2 + (y - y_b(t))^2 - l^2 = 0.
+\end{equation}
+
+The time derivatives of this constraint function are
+
+\begin{align}
+    \frac{d}{dt}g(x, y, t) &= 2x\dot{x} + 2(y - y_b(t))(\dot{y} - \dot{y}_b(t)) = 0 \\
+    \frac{d^2}{dt^2}g(x, y, t) &= 2\left[ \dot{x}^2 + (\dot{y} - \dot{y}_b(t))^2 + x\ddot{x} + (y - y_b(t))(\ddot{y} - \ddot{y}_b(t)) \right] = 0
+\end{align}
+
+We set $a(t) = \ddot{y}_b(t)$.
+
+\begin{equation}
+    x\ddot{x} + (y - y_b(t))\ddot{y} = -\dot{x}^2 - (\dot{y} - \dot{y}_b(t))^2 + (y - y_b(t))a(t)
+\end{equation}
+
+Applying Newton's Second Law with constraint force vector $\mathbf{F}_c = -\lambda \nabla g$
+
+\begin{align}
+m\ddot{x} + \lambda x &= 0 \\
+m\ddot{y} + \lambda (y - y_b(t)) &= -mg
+\end{align}
+
+which can be written out in matrix form as
+
+\begin{equation}
+\begin{pmatrix}
+m & 0 & x \\
+0 & m & y - y_b(t) \\
+x & y - y_b(t) & 0
+\end{pmatrix}
+\begin{pmatrix}
+\ddot{x} \\
+\ddot{y} \\
+\lambda
+\end{pmatrix}
+=
+\begin{pmatrix}
+0 \\
+-mg \\
+-\dot{x}^2 - (\dot{y} - \dot{y}_b(t))^2 + (y - y_b(t))a(t)
+\end{pmatrix}
+\end{equation}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{Problems/Problem29/figures/ode_vs_dae_comparison_euler.png}
+    \caption{Comparing an approximate DAE solution to an "exact" high accuracy numerical solution of the explicit solution for the system given as a second order differential equation}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{Problems/Problem29/figures/ode_vs_dae_comparison.png}
+    \caption{Comparing Exact Solutuon to DAE Solution (5th Order Solver)}
+\end{figure}
