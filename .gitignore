@@ -8,3 +8,14 @@
 *.fdb_latexmk
 *.aux
 *.pdf
+
+# Ignore all PNG and GIF files anywhere in the repository
+*.png
+.gif
+
+# Un-ignore (allow) PNG and GIF files located anywhere inside the report directory
+!report/**/*.png
+!report/*.png
+
+!report/**/*.gif
+!report/*.gif
