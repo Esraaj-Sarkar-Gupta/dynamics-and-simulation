@@ -1,0 +1,159 @@
+\section{Triple Pendulum}
+In this section, different methods are used to solve for a Triple Pendulum system with discrete point masses $m_1, m_2, m_3$, each connected by rigid connections of length $l_1, l_2, l_3$, making angles $\theta_1, \theta_2, \theta_3$ with the normal. Unless mentioned otherwise, all results presented follow $m_i = l_i = 1.0$, with initial conditions $\theta_i^\text{initial} = \frac{\pi}{2}$ and $\omega_i^\text{initial} = 0.0$; for $i = 1,2,3$.
+
+\subsection{The Lagrangian Formalism}
+The system is first solved using the Lagrangian Formalism, for which the net potential energy and net kinetic energy have to be expressed. The potential energy $\mathcal{V}$ is
+
+\begin{equation}
+    \mathcal{V} = -m_1gl_1\cos(\theta_1) - m_2g \left\{ l_1\cos(\theta_1) + l_2\cos(\theta_2) \right\} -
+    m_3g \left\{l_1\cos(\theta_1) + l_2\cos(\theta_2) + l_3\cos(\theta_3) \right\}
+\end{equation}
+
+and the net kinetic energy $\mathcal{T}$ is
+
+\begin{align}
+    T &= \frac{1}{2} m_1 \left( v_{x1}^2 + v_{y1}^2 \right) + \frac{1}{2} m_2 \left( v_{x2}^2 + v_{y2}^2 \right) + \frac{1}{2} m_3 \left( v_{x3}^2 + v_{y3}^2 \right)
+\end{align}
+
+where
+
+\begin{align}
+    v_{x1} &= l_1 \cos(q_1) \, \dot{q}_1 \\
+    v_{y1} &= l_1 \sin(q_1) \, \dot{q}_1 \\[0.5em]
+    v_{x2} &= v_{x1} + l_2 \cos(q_2) \, \dot{q}_2 \\
+    v_{y2} &= v_{y1} + l_2 \sin(q_2) \, \dot{q}_2 \\[0.5em]
+    v_{x3} &= v_{x2} + l_3 \cos(q_3) \, \dot{q}_3 \\
+    v_{y3} &= v_{y2} + l_3 \sin(q_3) \, \dot{q}_3.
+\end{align}
+
+The Lagrangian $\mathcal{L} = \mathcal{T} - \mathcal{V}$ is placed in the Euler-Lagrange Equation Eq. \ref{eq:Euler Lagrange Equation}, the computations for which are done using Julia's \texttt{Symbolics} package. The simplified expressions are neither computed not reported, since the simplification is computationally expensive.
+
+\begin{minted}{julia}
+@variables t
+d = Differential(t)
+dd = Differential(t)^2
+
+@variables m1 m2 m3 l1 l2 l3 g
+@variables θ1(t) θ2(t) θ3(t)
+@variables q1 q2 q3 dq1 dq2 dq3
+
+# Kinematics and Energy
+V = -g * (m1*l1*cos(q1) + m2*l1*cos(q1) + l2*cos(q2)) + m3*(l1*cos(q1) + l2*cos(q2) + l3*cos(q3)))
+
+# Unsigned velocities (using simple chain-rule differentiation)
+vx1 = l1 * cos(q1) * dq1
+vy1 = l1 * sin(q1) * dq1
+vx2 = vx1 + l2 * cos(q2) * dq2
+vy2 = vy1 + l2 * sin(q2) * dq2
+vx3 = vx2 + l3 * cos(q3) * dq3
+vy3 = vy2 + l3 * sin(q3) * dq3
+
+T = 0.5 * m1 * (vx1^2 + vy1^2) + 0.5 * m2 * (vx2^2 + vy2^2) + 0.5 * m3 * (vx3^2 + vy3^2)
+L = T - V
+
+# Partials evaluated using static variables
+sub_back = Dict(q1=>θ1, q2=>θ2, q3=>θ3, dq1=>d(θ1), dq2=>d(θ2), dq3=>d(θ3))
+pL_pθ1 = substitute(expand_derivatives(Differential(q1)(L)), sub_back)
+pL_pθ2 = substitute(expand_derivatives(Differential(q2)(L)), sub_back)
+pL_pθ3 = substitute(expand_derivatives(Differential(q3)(L)), sub_back)
+pL_pdθ1 = substitute(expand_derivatives(Differential(dq1)(L)), sub_back)
+pL_pdθ2 = substitute(expand_derivatives(Differential(dq2)(L)), sub_back)
+pL_pdθ3 = substitute(expand_derivatives(Differential(dq3)(L)), sub_back)
+
+# Euler-Lagrange equations (LHS = 0)
+eq1_lhs = expand_derivatives(d(pL_pdθ1)) - pL_pθ1
+eq2_lhs = expand_derivatives(d(pL_pdθ2)) - pL_pθ2
+eq3_lhs = expand_derivatives(d(pL_pdθ3)) - pL_pθ3
+\end{minted}
+
+The Euler-Lagrange Equations for any system are always linear with respect to the generalized accelerations $\ddot{q}$. The governing equations naturally take the form
+
+\begin{equation}
+    \undertilde{E}(\theta, \dot\theta \ddot\theta) = \undertilde{M}(\theta) \ddot{\theta} - \bar{f}(\theta, \dot{theta}) = 0
+\end{equation}
+
+where $\undertilde{M}(\theta)$  is the configuration dependent \textit{Mass Matrix} and $\bar{f}$ is the \textit{forcing vector} containing all velocity dependent and position dependent terms.
+
+\begin{enumerate}
+    \item \textbf{Extracting the mass matrix: } This is done by finding the Jacobian of $E$ with respect to the second order derivative terms $\ddot\theta$.
+        \begin{equation}
+            \undertilde{J} = \frac{\partial}{\partial \ddot\theta_j} \undertilde{E}
+        \end{equation}
+        This eliminates all $\bar{f}$ terms.
+
+        \begin{minted}{julia}
+        M_sym = Symbolics.jacobian(eqs_lhs, vars_dd)
+        \end{minted}
+
+    \item \textbf{Isolating the forcing vector: } The system is isolated at $\ddot\theta_j = 0 \forall j$, which results in
+        \begin{equation}
+            \undertilde{E}\Big\vert{}_{\ddot{\theta}=\mathbf{0}} =
+            \undertilde{M}(\theta)\cdot \mathbf{0} - \bar{f}(\theta, \dot{\theta}) =
+            -\bar{f}(\theta, \dot{\theta})
+        \end{equation}
+
+        the negation of which directly yields the forcing vector.
+
+        \begin{minted}{julia}
+        zero_dd = Dict(dd(θ1)=>0, dd(θ2)=>0, dd(θ3)=>0)
+        f_sym = substitute.(-1 .* eqs_lhs, (zero_dd,))
+        \end{minted}
+\end{enumerate}
+
+Once the functions have been identified, they must be represented in a way that the Julia package \texttt{DifferentialEquations} is able to interact with them.
+
+\begin{enumerate}
+    \item Now, in order to convert the dynamics from time-dependent symbolic expressions to native julia machine code, static algebraic variables must be used.
+    
+        \begin{minted}{julia}
+        @variables th1 th2 th3 w1 w2 w3
+        state_subs = Dict(θ1=>th1, θ2=>th2, θ3=>th3, d(θ1)=>w1, d(θ2)=>w2, d(θ3)=>w3)
+
+        M_clean = substitute.(M_sym, (state_subs,))
+        f_clean = substitute.(f_sym, (state_subs,))
+        \end{minted}
+
+    \item The function arguments must now be structured for \texttt{DifferentialEquations}, and are grouped into parameters and state variables.
+    
+        \begin{minted}{julia}
+        state_vars = [th1, th2, th3, w1, w2, w3]
+        param_vars = [m1, m2, m3, l1, l2, l3, g]
+        \end{minted}
+
+    \item Now the functions are built using
+
+        \begin{minted}{julia}
+        M_func = build_function(M_clean, state_vars, param_vars, expression=Val{false})[1]
+        f_func = build_function(f_clean, state_vars, param_vars, expression=Val{false})[1]
+        \end{minted}
+
+        where the symbolic Abstract Syntax Tree (AST) of the cleaned expressions is read and compiles optimized Julia code directly into memory. \texttt{expression=Val{false}} tells \texttt{Symbolics} to JIT-compile the generated code into an executable run-time function handle immediately, instead of returning raw Julia code or AST objects.
+\end{enumerate}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/TriplePendu/figures/angles_plot.png}
+        \caption{End effector angles with respect to time}
+        \label{fig:sub1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/TriplePendu/figures/effector_trajectories.png}
+        \caption{End effector trajectories in space.}
+        \label{fig:sub2}
+    \end{subfigure}
+    \caption{Triple Pendulum Results: Solved using the Lagrangian Formalism}
+    \label{fig:main}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.50\textwidth]{Problems/TriplePendu/figures/pendulum_snapshot.png}
+    \caption{Triple Pendulum Animation Screenshot: Solved using the Lagrangian Formalism}
+\end{figure}
+
+
