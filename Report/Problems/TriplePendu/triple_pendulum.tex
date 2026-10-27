@@ -156,4 +156,96 @@ Once the functions have been identified, they must be represented in a way that 
     \caption{Triple Pendulum Animation Screenshot: Solved using the Lagrangian Formalism}
 \end{figure}
 
+\subsection{Differential Algebraic Equations Formalism}
+Expressing this system in the DAE formalism, firstly three constraints are considered.
 
+\begin{align}
+    \Phi_1 &= x_1^2 + y_1^2 - l_1^2 = 0 \\
+    \Phi_2 &= (\Delta x_2)^2 + (\Delta y_2)^2 -  l_2^2 = 0
+    \Phi_3 &= (\Delta x_3)^2 _ (\Delta y_3)^2 - l_3^2 = 0
+\end{align}
+
+where $\Delta X_i = X_i - X_{i-1}$; $X = x, y$ and $i = 2,3$.
+
+The constraint conditions derived from Newton's Second Law of Motion are expressed with the Lagrange Multipliers $\lambda_{1,2,3}$. All tensile constraint forces act proportionate to the direction of the tension:
+
+\begin{equation}
+    F_\mathrm{tension} = \mathrm{const} \cdot
+    \begin{pmatrix}
+        x \\
+        y
+    \end{pmatrix}
+\end{equation}
+
+Thus, the following six equations are produced.
+
+\begin{align}
+    m_1 \ddot{x}_1 &= -\lambda_1 x_1 + \lambda_2 \Delta x_2 \\
+    m_1 \ddot{y}_1 &= -m_1 g -\lambda_1 y_1 + \lambda_2 \Delta y_2 \\
+    m_2 \ddot{x}_2 &= -\lambda_2 \Delta x_2 + \lambda_3 \Delta x_3 \\
+    m_2 \ddot{y}_2 &= -m_2 g - \lambda_2 \Delta y_2 + \lambda_3 \Delta y_3 \\
+    m_3 \ddot{x}_3 &= -\lambda_3 \Delta x_3\\
+    m_3 \ddot{y}_3 &= -m_3 g - \lambda_3 \delta y_3
+\end{align}
+
+This is expressed and solved numerically as
+\begin{equation}
+    \begin{pmatrix}
+    m_1 & 0 & 0 & 0 & 0 & 0 & x_1 & -\Delta x_2 & 0 \\
+    0 & m_1 & 0 & 0 & 0 & 0 & y_1 & -\Delta y_2 & 0 \\
+    0 & 0 & m_2 & 0 & 0 & 0 & 0 & \Delta x_2 & -\Delta x_3 \\
+    0 & 0 & 0 & m_2 & 0 & 0 & 0 & \Delta y_2 & -\Delta y_3 \\
+    0 & 0 & 0 & 0 & m_3 & 0 & 0 & 0 & \Delta x_3 \\
+    0 & 0 & 0 & 0 & 0 & m_3 & 0 & 0 & \Delta y_3 \\
+    x_1 & y_1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    -\Delta x_2 & -\Delta y_2 & \Delta x_2 & \Delta y_2 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & -\Delta x_3 & -\Delta y_3 & \Delta x_3 & \Delta y_3 & 0 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+    \ddot{x}_1 \\
+    \ddot{y}_1 \\
+    \ddot{x}_2 \\
+    \ddot{y}_2 \\
+    \ddot{x}_3 \\
+    \ddot{y}_3 \\
+    \lambda_1 \\
+    \lambda_2 \\
+    \lambda_3
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+    0 \\
+    -m_1 g \\
+    0 \\
+    -m_2 g \\
+    0 \\
+    -m_3 g \\
+    -(\dot{x}_1^2 + \dot{y}_1^2) \\
+    -(\Delta \dot{x}_2^2 + \Delta \dot{y}_2^2) \\
+    -(\Delta \dot{x}_3^2 + \Delta \dot{y}_3^2)
+    \end{pmatrix}
+\end{equation}
+
+The constraint equations are differeniated twice with respect to time symbolically.
+
+\begin{align}
+\frac{d^2\Phi_1}{dt^2} &= 2\left(\dot{x}_1^2 + \dot{y}_1^2\right) + 2 x_1 \ddot{x}_1 + 2 y_1 \ddot{y}_1 = 0 \\[1.5ex]
+\frac{d^2\Phi_2}{dt^2} &= 2\left[\left(\dot{x}_2 - \dot{x}_1\right)^2 + \left(\dot{y}_2 - \dot{y}_1\right)^2\right] + 2(x_2 - x_1)(\ddot{x}_2 - \ddot{x}_1) + 2(y_2 - y_1)(\ddot{y}_2 - \ddot{y}_1) = 0 \\[1.5ex]
+\frac{d^2\Phi_3}{dt^2} &= 2\left[\left(\dot{x}_3 - \dot{x}_2\right)^2 + \left(\dot{y}_3 - \dot{y}_2\right)^2\right] + 2(x_3 - x_2)(\ddot{x}_3 - \ddot{x}_2) + 2(y_3 - y_2)(\ddot{y}_3 - \ddot{y}_2) = 0
+\end{align}
+
+The system of equations (in matrix form) is solved numerically, and results are presented.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{Problems/TriplePendu/DAE_figures/trajectories.png}
+    \caption{Triple Pendulum -- DAE Solution, End Affector Trajectories}
+\end{figure}
+
+The system solution was animated.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{Problems/TriplePendu/DAE_figures/report_snapshot.png}
+    \caption{Triple Pendulum DAE Solution Animation Snapshot}
+\end{figure}
