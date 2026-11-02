@@ -23,6 +23,7 @@
 
 % Math & Symbols
 \usepackage{amsmath, amssymb, amsfonts}
+\newcommand{\undertilde}[1]{\underset{\sim}{#1}}
 
 % Code Listing Configuration for Julia (minted)
 \usepackage{minted}
@@ -59,9 +60,14 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 
+% For me :3
+\newcommand{\icap}{\hat{\imath}}
+\newcommand{\jcap}{\hat{\jmath}}
+
+
 % Title Metadata
 \title{\textbf{Simulations and Dynamics Course Report}\\ \large Numerical Integration \& Nonlinear Dynamical Systems}
-\author{\textbf{Author Name} \\ Course Code: SD-401}
+\author{\textbf{Esraaj Sarkar Gupta} \\ Course Code: SD-401}
 \date{\today}
 
 \begin{document}
@@ -87,5 +93,16 @@ This will contain an abstract at some point.
 
 % We do whatever we want now
 \include{Problems/Problem21/problem_21}
+\include{Problems/Problem23/problem_23}
+\include{Problems/Problem24/problem_24}
+\include{Problems/Problem29/problem_29}
+\include{Problems/DoublePendu/double_pendulum}
+
+% The first capstone: The Triple Pendulum
+\include{Problems/TriplePendu/triple_pendulum}
+
+% Appendecies
+\include{appendecies/lagrangian}
+
 
 \end{document}

@@ -249,3 +249,271 @@ The system solution was animated.
     \includegraphics[width=0.75\textwidth]{Problems/TriplePendu/DAE_figures/report_snapshot.png}
     \caption{Triple Pendulum DAE Solution Animation Snapshot}
 \end{figure}
+
+% Requires amsmath (and minted, if the Julia listing is retained).
+% The angular conventions match the preceding triple-pendulum subsections:
+% θ_i is measured from the downward vertical, and each rod is massless.
+
+\subsection{Newton--Euler Formalism}
+\label{sec:triple_newton_euler}
+
+The triple pendulum may also be described using the Newton--Euler formalism,
+which derives the equations of motion directly from the forces and moments
+acting on the system. As in the preceding formulations, the rods are rigid
+and massless, the joints are frictionless, and the masses are concentrated at
+their respective joints. The angles $\theta_i$ are measured from the downward
+vertical. We take moments about the three joints: the fixed support $O$, the
+joint $A$ at $m_1$, and the joint $B$ at $m_2$. The last two joints accelerate,
+so their equations must include moving-pivot corrections.
+
+\paragraph{Kinematics.}
+Set $\mathbf r_0=\mathbf 0$ and introduce the unit vectors
+\begin{equation}
+    \mathbf e_i =
+    \begin{pmatrix}\sin\theta_i\\-\cos\theta_i\end{pmatrix},
+    \qquad
+    \mathbf e_i^\perp =
+    \begin{pmatrix}\cos\theta_i\\\sin\theta_i\end{pmatrix}.
+\end{equation}
+The position, velocity, and acceleration of the $k$-th mass are
+\begin{align}
+    \mathbf r_k &= \sum_{i=1}^{k} l_i\mathbf e_i, \\
+    \mathbf v_k &= \sum_{i=1}^{k} l_i\dot\theta_i\mathbf e_i^\perp, \\
+    \mathbf a_k &= \sum_{i=1}^{k} l_i\left(
+        \ddot\theta_i\mathbf e_i^\perp
+        -\dot\theta_i^2\mathbf e_i\right),
+    \qquad k=1,2,3.
+    \label{eq:triple_ne_kinematics}
+\end{align}
+The support has $\mathbf v_0=\mathbf a_0=\mathbf 0$. The velocity and
+acceleration expressions are evaluated symbolically from the positions in
+\texttt{symbolics.jl}, using the chain rule.
+
+\paragraph{Moment equations at the three joints.}
+For an inertially fixed point $P$, Euler's angular-momentum equation reads
+\begin{equation}
+    \sum\boldsymbol\tau_P^{\mathrm{ext}}
+    = \frac{d\mathbf H_P}{dt},
+    \qquad
+    \mathbf H_P=\sum_k(\mathbf r_k-\mathbf r_P)
+        \times m_k\mathbf v_k.
+\end{equation}
+For a moving point $P$ it is useful instead to define angular momentum using
+\emph{relative} velocities. The corresponding moment equation for a subchain
+of particles is
+\begin{equation}
+    \boxed{
+    \sum\boldsymbol\tau_P^{\mathrm{ext}}
+    =\frac{d\mathbf H_{P,\mathrm{rel}}}{dt}
+    +\sum_k(\mathbf r_k-\mathbf r_P)\times m_k\mathbf a_P
+    }
+    \label{eq:triple_ne_moving_pivot}
+\end{equation}
+where
+$\mathbf H_{P,\mathrm{rel}}=\sum_k(\mathbf r_k-\mathbf r_P)
+\times m_k(\mathbf v_k-\mathbf v_P)$.
+The additional term is essential because $P$ need not be inertially fixed.
+It is automatically zero when the pivot is unaccelerated. Since the motion is planar, only
+the $z$-components of these vector equations are nonzero.
+
+The three moment equations are applied to progressively shorter subchains:
+about $O$ we consider all three masses; about $A$ we consider masses $m_2$
+and $m_3$; and about $B$ we consider only $m_3$. This choice eliminates the
+unknown joint reactions from each moment equation. In particular, the force
+transmitted at the proximal joint acts along its connecting rod and produces
+no moment about that joint, while the internal forces of the subchain cancel.
+
+To express all three equations uniformly, let $P_{j-1}$ denote the joint at
+$\mathbf r_{j-1}$, with $P_0=O$, $P_1=A$, and $P_2=B$. For $j=1,2,3$ define
+\begin{align}
+    H_j &:= \sum_{k=j}^{3}
+        \left[(\mathbf r_k-\mathbf r_{j-1})\times
+        m_k(\mathbf v_k-\mathbf v_{j-1})\right]_z,
+        \label{eq:triple_ne_Hj}\\
+    C_j &:= \sum_{k=j}^{3}
+        \left[(\mathbf r_k-\mathbf r_{j-1})\times
+        m_k\mathbf a_{j-1}\right]_z,
+        \label{eq:triple_ne_Cj}\\
+    \tau_j^{(g)} &:= -g\sum_{k=j}^{3}
+        m_k(x_k-x_{j-1}).
+        \label{eq:triple_ne_tau}
+\end{align}
+The residuals of the three Newton--Euler equations are then
+\begin{equation}
+    E_j:=\frac{dH_j}{dt}+C_j-\tau_j^{(g)}=0,
+    \qquad j=1,2,3.
+    \label{eq:triple_ne_raw}
+\end{equation}
+Thus $C_1=0$, whereas $C_2$ and $C_3$ account for the accelerations of
+joints $A$ and $B$, respectively. Although the moment equations can be
+expanded by hand, doing so yields lengthy expressions involving several
+angular-acceleration terms and trigonometric couplings. Here they are formed
+and differentiated in Julia using \texttt{Symbolics.jl}, rather than being
+introduced as precomputed equations.
+
+\paragraph{Symbolic extraction of the equations of motion.}
+The three residuals in Eq.~\eqref{eq:triple_ne_raw} are not yet the most
+convenient equations to integrate. Subtracting successive joint-moment
+equations isolates the generalized equations associated with each angle:
+\begin{equation}
+    \mathbf E =
+    \begin{pmatrix}
+        E_1-E_2\\E_2-E_3\\E_3
+    \end{pmatrix}=\mathbf 0.
+    \label{eq:triple_ne_reduced}
+\end{equation}
+Since these equations are linear in the angular accelerations, they have the
+form
+\begin{equation}
+    \mathbf E(\boldsymbol\theta,\dot{\boldsymbol\theta},
+               \ddot{\boldsymbol\theta})
+    =\mathbf M(\boldsymbol\theta)\ddot{\boldsymbol\theta}
+    -\mathbf b(\boldsymbol\theta,\dot{\boldsymbol\theta})=\mathbf0.
+    \label{eq:triple_ne_affine}
+\end{equation}
+As in the Lagrangian implementation, the coefficient matrix is obtained from
+the Jacobian of the residuals with respect to angular acceleration, and the
+forcing vector from their value at zero angular acceleration:
+\begin{equation}
+    M_{ij}=\frac{\partial E_i}{\partial\ddot\theta_j},
+    \qquad
+    \mathbf b=-\left.\mathbf E\right|_{\ddot{\boldsymbol\theta}=\mathbf0}.
+    \label{eq:triple_ne_extract}
+\end{equation}
+The essential steps in \texttt{symbolics.jl} are
+\begin{minted}{julia}
+# residuals[j] = dH_j/dt + C_j - tau_gravity[j]
+equations = [residuals[1] - residuals[2],
+             residuals[2] - residuals[3], residuals[3]]
+M_sym = Symbolics.jacobian(equations, α)
+zero_alpha = Dict(α1=>0, α2=>0, α3=>0)
+b_sym = [-substitute(E, zero_alpha) for E in equations]
+\end{minted}
+The actual file constructs $E_1,E_2,E_3$ from the position vectors, relative
+angular momenta, gravitational moments, and moving-pivot corrections before
+performing this extraction. To avoid unnecessarily expanding the time
+derivative of every angular-momentum product, it uses the equivalent identity
+$\frac{d}{dt}(\mathbf r_{k/P}\times m_k\mathbf v_{k/P})
+=\mathbf r_{k/P}\times m_k\mathbf a_{k/P}$, since
+$\mathbf v_{k/P}\times\mathbf v_{k/P}=\mathbf0$. The kinematic accelerations
+are themselves obtained by symbolic differentiation.
+
+Writing $S_1=m_1+m_2+m_3$, $S_2=m_2+m_3$, $S_3=m_3$, and
+$\Delta_{ij}=\theta_i-\theta_j$, the resulting matrix can be presented
+compactly as
+\begin{equation}
+    \boxed{
+    \mathbf M(\boldsymbol\theta)=
+    \begin{pmatrix}
+        S_1l_1^2 & S_2l_1l_2\cos\Delta_{12}
+                    & S_3l_1l_3\cos\Delta_{13}\\
+        S_2l_1l_2\cos\Delta_{12} & S_2l_2^2
+                    & S_3l_2l_3\cos\Delta_{23}\\
+        S_3l_1l_3\cos\Delta_{13} & S_3l_2l_3\cos\Delta_{23}
+                    & S_3l_3^2
+    \end{pmatrix}
+    }
+    \label{eq:triple_ne_mass_matrix}
+\end{equation}
+with forcing components
+\begin{align}
+    b_1 &= -S_1gl_1\sin\theta_1
+           -S_2l_1l_2\dot\theta_2^2\sin\Delta_{12}
+           -S_3l_1l_3\dot\theta_3^2\sin\Delta_{13}, \\
+    b_2 &= -S_2gl_2\sin\theta_2
+           +S_2l_1l_2\dot\theta_1^2\sin\Delta_{12}
+           -S_3l_2l_3\dot\theta_3^2\sin\Delta_{23}, \\
+    b_3 &= -S_3gl_3\sin\theta_3
+           +S_3l_1l_3\dot\theta_1^2\sin\Delta_{13}
+           +S_3l_2l_3\dot\theta_2^2\sin\Delta_{23}.
+    \label{eq:triple_ne_forcing}
+\end{align}
+The three coupled equations of motion are therefore
+\begin{equation}
+    \boxed{\mathbf M(\boldsymbol\theta)\ddot{\boldsymbol\theta}
+           =\mathbf b(\boldsymbol\theta,\dot{\boldsymbol\theta}).}
+    \label{eq:triple_ne_final}
+\end{equation}
+For strictly positive point masses and rod lengths, $\mathbf M$ is positive
+definite at every configuration, so the angular accelerations are uniquely
+determined. Indeed, for any nonzero vector of angular velocities,
+$\dot{\boldsymbol\theta}^{\top}\mathbf M\dot{\boldsymbol\theta}
+=\sum_{k=1}^{3}m_k\|\mathbf v_k\|^2>0$, because the triangular
+kinematic relations imply that not all $\mathbf v_k$ can vanish unless
+all angular velocities vanish. The state vector is
+$\mathbf u=(\theta_1,\theta_2,\theta_3,
+\dot\theta_1,\dot\theta_2,\dot\theta_3)^\top$; at each solver evaluation,
+\texttt{system.jl} constructs $\mathbf M$ and $\mathbf b$, solves the linear
+system using Julia's backslash operator, and returns the first-order time
+derivatives. The resulting ODE is integrated using the \texttt{Tsit5} method
+from \texttt{DifferentialEquations.jl}, with absolute and relative tolerances
+of $10^{-8}$. The symbolic implementation also evaluates the resulting
+matrix and forcing vector numerically at a test configuration and checks them
+against the compact expressions used by the numerical solver.
+
+The equations coincide with the equations obtained using the
+Euler--Lagrange formalism. Their agreement provides an independent check of
+the dynamics, while the explicit moving-pivot terms show why the rotational
+moment equation for a fixed pivot cannot be applied unmodified at joints $A$
+and $B$. Trajectory, angular-displacement, and energy-conservation plots, as
+well as a pendulum animation, are generated separately by
+\texttt{animations.jl} and called from \texttt{main.jl}.
+
+The results from the symbolic computer are massive and not human readable.
+
+\begin{minted}{text}
+[1] Moment about O (all three masses):
+   H_rel = ((cos(θ1)^2)*(l1^2)*ω1 + (l1^2)*(sin(θ1)^2)*ω1)*m1 + (-(-cos(θ1)*l1 - cos(θ2)*l2)*(cos(θ1)*l1*ω1 + cos(θ2)*l2*ω2) + (l1*sin(θ1) + l2*sin(θ2))*(l1*sin(θ1)*ω1 + l2*sin(θ2)*ω2))*m2 + (-(-cos(θ1)*l1 - cos(θ2)*l2 - cos(θ3)*l3)*(cos(θ1)*l1*ω1 + cos(θ2)*l2*ω2 + cos(θ3)*l3*ω3) + (l1*sin(θ1) + l2*sin(θ2) + l3*sin(θ3))*(l1*sin(θ1)*ω1 + l2*sin(θ2)*ω2 + l3*sin(θ3)*ω3))*m3
+   moving-pivot correction = 0
+   gravitational torque = -g*l1*m1*sin(θ1) - g*(l1*sin(θ1) + l2*sin(θ2))*m2 - g*(l1*sin(θ1) + l2*sin(θ2) + l3*sin(θ3))*m3
+
+[2] Moment about A (masses 2 and 3):
+   H_rel = ((cos(θ2)^2)*(l2^2)*ω2 + (l2^2)*(sin(θ2)^2)*ω2)*m2 + (-(-cos(θ2)*l2 - cos(θ3)*l3)*(cos(θ2)*l2*ω2 + cos(θ3)*l3*ω3) + (l2*sin(θ2) + l3*sin(θ3))*(l2*sin(θ2)*ω2 + l3*sin(θ3)*ω3))*m3
+   moving-pivot correction = (cos(θ2)*(cos(θ1)*l1*α1 - l1*sin(θ1)*(ω1^2))*l2 + (l1*sin(θ1)*α1 + cos(θ1)*l1*(ω1^2))*l2*sin(θ2))*m2 + ((l1*sin(θ1)*α1 + cos(θ1)*l1*(ω1^2))*(l2*sin(θ2) + l3*sin(θ3)) - (-cos(θ2)*l2 - cos(θ3)*l3)*(cos(θ1)*l1*α1 - l1*sin(θ1)*(ω1^2)))*m3
+   gravitational torque = -g*l2*m2*sin(θ2) - g*(l2*sin(θ2) + l3*sin(θ3))*m3
+
+[3] Moment about B (mass 3):
+   H_rel = ((cos(θ3)^2)*(l3^2)*ω3 + (l3^2)*(sin(θ3)^2)*ω3)*m3
+   moving-pivot correction = (cos(θ3)*(cos(θ1)*l1*α1 + cos(θ2)*l2*α2 - l1*sin(θ1)*(ω1^2) - l2*sin(θ2)*(ω2^2))*l3 + (l1*sin(θ1)*α1 + l2*sin(θ2)*α2 + cos(θ1)*l1*(ω1^2) + cos(θ2)*l2*(ω2^2))*l3*sin(θ3))*m3
+   gravitational torque = -g*l3*m3*sin(θ3)
+\end{minted}
+
+Similar to the method followed when deriving and solving the Euler-Lagrange equations for this system, the mass matrix is extracted by computing the Jacobian matrix, and the forcing vector is isolated.
+
+\begin{figure}[htbp]
+    \centering
+    % Top Row
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/TriplePendu/Newton-Euler/figures/energy_conservation.png}
+        \caption{Mechanical Energy Drift}
+        \label{fig:te_energy}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/TriplePendu/Newton-Euler/figures/trajectories.png}
+        \caption{End-Effector Trajectories}
+        \label{fig:te_traj}
+    \end{subfigure}
+
+    \vspace{0.5cm} % Vertical space between rows
+
+    % Bottom Row
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/TriplePendu/Newton-Euler/figures/report_snapshot.png}
+        \caption{System Snapshot}
+        \label{fig:te_snap}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/TriplePendu/Newton-Euler/figures/angles_plot.png}
+        \caption{Angular Motion}
+        \label{fig:te_angles}
+    \end{subfigure}
+
+    \caption{Newton--Euler analysis of the triple pendulum system.}
+    \label{fig:triple_pendulum_results}
+\end{figure}

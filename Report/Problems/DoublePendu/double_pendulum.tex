@@ -268,5 +268,503 @@ This DAE system  may be written as a single matrix equation. Over here, however,
     \label{fig:main_label}
 \end{figure}
 
-\subsection{Newton-Euler Formalism}
-Must be done, and will be done!
+\subsection{Newton--Euler Formalism}
+
+The Newton--Euler formalism provides an alternative method for deriving the equations of motion of a mechanical system by applying Newton's second law for translational motion and Euler's equation for rotational motion. Unlike the Euler--Lagrange formulation, which derives the equations of motion from the kinetic and potential energies, the Newton--Euler approach considers the forces and moments acting on the constituent bodies directly.
+
+For a system of particles, the rotational equation of motion about a fixed point \(O\) is
+
+\begin{equation}
+    \sum \boldsymbol{\tau}_O^{\mathrm{ext}}
+    =
+    \frac{d\mathbf{H}_O}{dt},
+\end{equation}
+
+where \(\boldsymbol{\tau}_O^{\mathrm{ext}}\) denotes the total external moment about \(O\), and \(\mathbf{H}_O\) is the angular momentum of the system about that point, defined as
+
+\begin{equation}
+    \mathbf{H}_O
+    =
+    \sum_i \mathbf{r}_i \times m_i\mathbf{v}_i.
+\end{equation}
+
+Here, \(\mathbf{r}_i\) and \(\mathbf{v}_i\) are the position and velocity of the \(i\)-th particle relative to an inertial reference frame, with positions measured from \(O\).
+
+For the double pendulum, moments are taken about the two joints: the fixed pivot \(O\), and the moving joint \(A\) connecting the two rods. Since the rods are assumed to be massless and the joints frictionless, the only external moments about the fixed pivot arise from gravity. The internal joint forces do not contribute to the net moment of the complete system.
+
+\paragraph{Kinematics of the system.}
+
+The positions of the two masses are
+
+\begin{align}
+    \mathbf{r}_1 &=
+    \begin{pmatrix}
+        l_1\sin\theta_1\\
+        -l_1\cos\theta_1
+    \end{pmatrix},\\
+    \mathbf{r}_2 &=
+    \begin{pmatrix}
+        l_1\sin\theta_1+l_2\sin\theta_2\\
+        -l_1\cos\theta_1-l_2\cos\theta_2
+    \end{pmatrix}.
+\end{align}
+
+Differentiating with respect to time gives the velocities
+
+\begin{align}
+    \mathbf{v}_1 &=
+    l_1\dot{\theta}_1
+    \begin{pmatrix}
+        \cos\theta_1\\
+        \sin\theta_1
+    \end{pmatrix},\\
+    \mathbf{v}_2 &=
+    l_1\dot{\theta}_1
+    \begin{pmatrix}
+        \cos\theta_1\\
+        \sin\theta_1
+    \end{pmatrix}
+    +
+    l_2\dot{\theta}_2
+    \begin{pmatrix}
+        \cos\theta_2\\
+        \sin\theta_2
+    \end{pmatrix}.
+\end{align}
+
+The corresponding accelerations are
+
+\begin{align}
+    \mathbf{a}_1 &=
+    l_1
+    \begin{pmatrix}
+        \ddot{\theta}_1\cos\theta_1
+        -\dot{\theta}_1^2\sin\theta_1\\
+        \ddot{\theta}_1\sin\theta_1
+        +\dot{\theta}_1^2\cos\theta_1
+    \end{pmatrix},\\
+    \mathbf{a}_2 &= \mathbf{a}_1
+    +l_2
+    \begin{pmatrix}
+        \ddot{\theta}_2\cos\theta_2
+        -\dot{\theta}_2^2\sin\theta_2\\
+        \ddot{\theta}_2\sin\theta_2
+        +\dot{\theta}_2^2\cos\theta_2
+    \end{pmatrix}.
+\end{align}
+
+For brevity, define the relative angular displacement
+
+\begin{equation}
+    \Delta=\theta_1-\theta_2.
+\end{equation}
+
+\paragraph{Moment about the first joint.}
+
+We first consider the angular momentum of the entire system about the fixed pivot \(O\). The total angular momentum is
+
+\begin{equation}
+    \mathbf{H}_O
+    =
+    \mathbf{r}_1\times m_1\mathbf{v}_1
+    +
+    \mathbf{r}_2\times m_2\mathbf{v}_2.
+\end{equation}
+
+Since the motion is restricted to the \(xy\)-plane, the angular momentum has only a \(z\)-component. Evaluating the cross products gives
+
+\begin{align}
+    H_O
+    &=
+    m_1l_1^2\dot{\theta}_1
+    +m_2\Big[
+        l_1^2\dot{\theta}_1
+        +l_2^2\dot{\theta}_2 \nonumber\\
+    &\qquad
+        +l_1l_2
+        (\dot{\theta}_1+\dot{\theta}_2)
+        \cos\Delta
+    \Big].
+\end{align}
+
+Taking the time derivative,
+
+\begin{align}
+    \frac{dH_O}{dt}
+    &=
+    (m_1+m_2)l_1^2\ddot{\theta}_1
+    +m_2l_2^2\ddot{\theta}_2 \nonumber\\
+    &\quad
+    +m_2l_1l_2
+    (\ddot{\theta}_1+\ddot{\theta}_2)
+    \cos\Delta \nonumber\\
+    &\quad
+    -m_2l_1l_2
+    (\dot{\theta}_1^2-\dot{\theta}_2^2)
+    \sin\Delta.
+\end{align}
+
+The gravitational forces acting on the masses are
+
+\begin{equation}
+    \mathbf{F}_{g,1}=
+    \begin{pmatrix}0\\-m_1g\end{pmatrix},
+    \qquad
+    \mathbf{F}_{g,2}=
+    \begin{pmatrix}0\\-m_2g\end{pmatrix}.
+\end{equation}
+
+Their total moment about \(O\) is
+
+\begin{align}
+    \tau_O
+    &=
+    \mathbf{r}_1\times\mathbf{F}_{g,1}
+    +\mathbf{r}_2\times\mathbf{F}_{g,2}\nonumber\\
+    &=
+    -(m_1+m_2)gl_1\sin\theta_1
+    -m_2gl_2\sin\theta_2.
+\end{align}
+
+Applying Euler's rotational equation, \(\tau_O=dH_O/dt\), we obtain
+
+\begin{align}
+    &(m_1+m_2)l_1^2\ddot{\theta}_1
+    +m_2l_2^2\ddot{\theta}_2 \nonumber\\
+    &\quad
+    +m_2l_1l_2
+    (\ddot{\theta}_1+\ddot{\theta}_2)
+    \cos\Delta \nonumber\\
+    &\quad
+    +m_2l_1l_2
+    (\dot{\theta}_2^2-\dot{\theta}_1^2)
+    \sin\Delta \nonumber\\
+    &=
+    -(m_1+m_2)gl_1\sin\theta_1
+    -m_2gl_2\sin\theta_2.
+    \label{eq:NE_joint1}
+\end{align}
+
+This equation describes the rotational dynamics of the complete system about the fixed pivot.
+
+\paragraph{Moment about the second joint.}
+
+We next consider the motion of the second mass \(m_2\) about the joint \(A\), located at the first mass \(m_1\).
+
+Unlike the first pivot, \(A\) is not stationary. Consequently, its acceleration must be accounted for when applying the angular momentum equation.
+
+Let the relative position of \(m_2\) with respect to \(A\) be
+
+\begin{equation}
+    \mathbf{r}_{2/A}
+    =
+    \mathbf{r}_2-\mathbf{r}_1
+    =
+    l_2
+    \begin{pmatrix}
+        \sin\theta_2\\
+        -\cos\theta_2
+    \end{pmatrix}.
+\end{equation}
+
+The acceleration of \(m_2\) may be decomposed into the acceleration of the joint and its acceleration relative to the joint:
+
+\begin{equation}
+    \mathbf{a}_2
+    =
+    \mathbf{a}_1+\mathbf{a}_{2/A},
+\end{equation}
+
+where
+
+\begin{equation}
+    \mathbf{a}_{2/A}
+    =
+    l_2
+    \begin{pmatrix}
+        \ddot{\theta}_2\cos\theta_2
+        -\dot{\theta}_2^2\sin\theta_2\\
+        \ddot{\theta}_2\sin\theta_2
+        +\dot{\theta}_2^2\cos\theta_2
+    \end{pmatrix}.
+\end{equation}
+
+Taking the moment of Newton's second law about \(A\),
+
+\begin{equation}
+    \sum\boldsymbol{\tau}_A^{\mathrm{ext}}
+    =
+    \mathbf{r}_{2/A}\times m_2\mathbf{a}_2.
+\end{equation}
+
+Substituting the acceleration decomposition gives
+
+\begin{equation}
+    \sum\boldsymbol{\tau}_A^{\mathrm{ext}}
+    =
+    \mathbf{r}_{2/A}\times m_2\mathbf{a}_{2/A}
+    +
+    \mathbf{r}_{2/A}\times m_2\mathbf{a}_1.
+\end{equation}
+
+The first term is the time derivative of the angular momentum relative to the moving joint:
+
+\begin{equation}
+    \mathbf{r}_{2/A}\times m_2\mathbf{a}_{2/A}
+    =
+    m_2l_2^2\ddot{\theta}_2\,\hat{\mathbf{z}}.
+\end{equation}
+
+The second term accounts for the acceleration of the joint itself. Evaluating the cross product,
+
+\begin{align}
+    \mathbf{r}_{2/A}\times m_2\mathbf{a}_1
+    &=
+    m_2l_1l_2
+    \Big(
+        \ddot{\theta}_1\cos\Delta
+        -\dot{\theta}_1^2\sin\Delta
+    \Big)\hat{\mathbf{z}}.
+\end{align}
+
+The force transmitted through the second rod acts along the rod and therefore produces no moment about \(A\). Thus, the only external moment on the second mass about \(A\) is due to gravity:
+
+\begin{equation}
+    \tau_A
+    =
+    -m_2gl_2\sin\theta_2.
+\end{equation}
+
+Equating the gravitational moment to the inertial terms,
+
+\begin{align}
+    &m_2l_2^2\ddot{\theta}_2
+    +m_2l_1l_2\ddot{\theta}_1\cos\Delta
+    \nonumber\\
+    &\qquad
+    -m_2l_1l_2\dot{\theta}_1^2\sin\Delta
+    =
+    -m_2gl_2\sin\theta_2.
+\end{align}
+
+Dividing by \(m_2l_2\), we obtain
+
+\begin{equation}
+    \boxed{
+    l_1\ddot{\theta}_1\cos\Delta
+    +l_2\ddot{\theta}_2
+    =
+    l_1\dot{\theta}_1^2\sin\Delta
+    -g\sin\theta_2
+    }
+    \label{eq:NE_joint2}
+\end{equation}
+
+This is the second equation of motion.
+
+\paragraph{Coupled equations of motion.}
+
+The equations obtained by taking moments about the two joints can now be rearranged into the same coupled system found using the Euler--Lagrange formulation.
+
+Multiplying Equation~\eqref{eq:NE_joint2} by \(m_2l_2\) and subtracting the resulting expression from Equation~\eqref{eq:NE_joint1} eliminates the terms associated with the second mass's angular acceleration about the moving joint. The remaining equation is
+
+\begin{align}
+    &(m_1+m_2)l_1^2\ddot{\theta}_1
+    +m_2l_1l_2\ddot{\theta}_2\cos\Delta\nonumber\\
+    &\qquad
+    +m_2l_1l_2\dot{\theta}_2^2\sin\Delta
+    +(m_1+m_2)gl_1\sin\theta_1
+    =0.
+\end{align}
+
+Dividing by \(l_1\) yields
+
+\begin{equation}
+    \boxed{
+    (m_1+m_2)l_1\ddot{\theta}_1
+    +m_2l_2\ddot{\theta}_2\cos\Delta
+    =
+    -m_2l_2\dot{\theta}_2^2\sin\Delta
+    -(m_1+m_2)g\sin\theta_1
+    }
+    \label{eq:NE_first}
+\end{equation}
+
+Combining Equations~\eqref{eq:NE_first} and \eqref{eq:NE_joint2}, the system can be expressed in matrix form:
+
+\begin{equation}
+    \boxed{
+    \begin{pmatrix}
+        (m_1+m_2)l_1 & m_2l_2\cos\Delta\\
+        l_1\cos\Delta & l_2
+    \end{pmatrix}
+    \begin{pmatrix}
+        \ddot{\theta}_1\\
+        \ddot{\theta}_2
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+        -m_2l_2\dot{\theta}_2^2\sin\Delta
+        -(m_1+m_2)g\sin\theta_1\\
+        l_1\dot{\theta}_1^2\sin\Delta
+        -g\sin\theta_2
+    \end{pmatrix}
+    }
+    \label{eq:NE_matrix}
+\end{equation}
+
+The determinant of the coefficient matrix is
+
+\begin{equation}
+    \det A
+    =
+    l_1l_2\left(m_1+m_2\sin^2\Delta\right)>0,
+\end{equation}
+
+for positive masses and rod lengths. The matrix is therefore invertible at every configuration.
+
+The angular accelerations \(\ddot{\theta}_1\) and \(\ddot{\theta}_2\) can consequently be determined by inverting the matrix, exactly as in the Euler--Lagrange formulation.
+
+The resulting equations of motion are identical to those obtained previously using the Euler--Lagrange equations. This equivalence provides an independent verification of the analytical derivation and illustrates how the same mechanical system can be described through either energy-based or force-and-moment-based methods.
+
+The equations can be derived and simplified relatively simply for such a system. For more complex systems symbolic computing is utilized. This has been exemplified here using the \texttt{Symbolics.jl} package in Julia.
+
+\begin{minted}{julia}
+function derive_newton_euler()
+    @variables θ1 θ2 ω1 ω2 α1 α2
+    @variables m1 m2 l1 l2 g
+
+    q = [θ1, θ2, ω1, ω2]
+    qdot = [ω1, ω2, α1, α2]
+    dt(expr) = time_derivative(expr, q, qdot)
+
+    # 1. Positions, velocities and accelerations.
+    r1 = [l1 * sin(θ1), -l1 * cos(θ1)]
+    r2 = [l1 * sin(θ1) + l2 * sin(θ2),
+          -l1 * cos(θ1) - l2 * cos(θ2)]
+
+    v1 = dt.(r1)
+    v2 = dt.(r2)
+    a1 = dt.(v1)
+
+    # 2. Moment about O: dH_O/dt = τ_O.
+    HO = cross2(r1, m1 .* v1) + cross2(r2, m2 .* v2)
+    τO = -m1 * g * r1[1] - m2 * g * r2[1]
+    residual_O = simplify(dt(HO) - τO)
+
+    # 3. Moment about A: dH_A,rel/dt + r₂/A × m₂ a_A = τ_A.
+    r2A = r2 .- r1
+    v2A = v2 .- v1
+    HA_rel = cross2(r2A, m2 .* v2A)
+    moving_pivot_term = cross2(r2A, m2 .* a1)
+    τA = -m2 * g * r2A[1]
+    residual_A = simplify(dt(HA_rel) + moving_pivot_term - τA)
+
+    # 4. Reduce to the two ODEs used in system.jl.
+    #    (O - A)/l1 is the θ1 equation; A/(m2*l2) is the θ2 equation.
+    eq1 = simplify((residual_O - residual_A) / l1)
+    eq2 = simplify(residual_A / (m2 * l2))
+    residuals = [eq1, eq2]
+
+    # 5. Because the equations are linear in α1, α2, the Jacobian with
+    #    respect to angular accelerations IS the coefficient matrix A.
+    accelerations = [α1, α2]
+    A = simplify.(Symbolics.jacobian(residuals, accelerations))
+
+    zero_accelerations = Dict(α1 => 0, α2 => 0)
+    b = -simplify.([substitute(eq, zero_accelerations) for eq in residuals])
+
+    return (HO=HO, HA_rel=HA_rel,
+            moving_pivot_term=moving_pivot_term,
+            torque_O=τO, torque_A=τA,
+            moment_O=residual_O, moment_A=residual_A,
+            reduced_equations=residuals,
+            A=A, b=b)
+end
+\end{minted}
+
+This system is simulated in Julia: the definition of the system is given below.
+
+\begin{minted}{julia}
+"""
+Return the 2×2 coefficient matrix A(θ) from the Newton--Euler equations,
+written as A(θ) * [θ̈1, θ̈2] = b(θ, ω).
+
+State ordering: u = [θ1, θ2, ω1, ω2].
+"""
+function construct_system_matrix(u, p::DoublePendulumParams)
+    θ1, θ2 = u[1:2]
+    Δ = θ1 - θ2
+    c = cos(Δ)
+
+    A = zeros(Float64, 2, 2)
+    A[1, 1] = (p.m1 + p.m2) * p.l1
+    A[1, 2] = p.m2 * p.l2 * c
+    A[2, 1] = p.l1 * c
+    A[2, 2] = p.l2
+
+    return A
+end
+
+"""
+Return the right-hand side b(θ, ω) of the reduced Newton--Euler system.
+
+The first equation comes from the moment about O minus the moment about A;
+the second comes from the moment about the accelerating joint A.
+"""
+function construct_rhs_vector(u, p::DoublePendulumParams)
+    θ1, θ2, ω1, ω2 = u
+    Δ = θ1 - θ2
+    s = sin(Δ)
+
+    b = zeros(Float64, 2)
+    b[1] = -p.m2 * p.l2 * ω2^2 * s - (p.m1 + p.m2) * p.g * sin(θ1)
+    b[2] =  p.l1 * ω1^2 * s - p.g * sin(θ2)
+
+    return b
+end
+
+"""First-order right-hand side for DifferentialEquations.jl."""
+function double_pendulum_ode!(du, u, p::DoublePendulumParams, t)
+    du[1] = u[3]
+    du[2] = u[4]
+
+    A = construct_system_matrix(u, p)
+    b = construct_rhs_vector(u, p)
+    α = A \ b  # α = [θ̈1, θ̈2]
+
+    du[3] = α[1]
+    du[4] = α[2]
+    return nothing
+end
+\end{minted}
+\begin{figure}[htbp]
+    \centering
+    % Top Row: Two Subfigures Side by Side
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/DoublePendu/Newton-Euler/figures/trajectories.png}
+        \caption{End Effector Trajectories}
+        \label{fig:top_left}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/DoublePendu/Newton-Euler/figures/report_snapshot.png}
+        \caption{Animation Snapshot}
+        \label{fig:top_right}
+    \end{subfigure}
+
+    \vspace{0.5cm} % Vertical space between rows
+
+    % Bottom Row: One Centered Subfigure
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Problems/DoublePendu/Newton-Euler/figures/energy_conservation.png}
+        \caption{Energy Conservation (Numerical Error)}
+        \label{fig:bottom_center}
+    \end{subfigure}
+
+    \caption{Combined figure showing two graphics at the top side by side and one centered below.}
+    \label{fig:overall_layout}
+\end{figure}
