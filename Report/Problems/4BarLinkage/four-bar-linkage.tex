@@ -1,9 +1,254 @@
 \section{Four-Bar Linkage System}
-% Define the system
-% Define variables
+\label{sec:four_bar}
 
-\subsection{Euler-Lagrange Formalism}
+A planar four-bar linkage consists of four rigid links connected by ideal revolute joints, one of which is fixed to the ground. The fixed pivots are denoted by $O$ and $D$, separated by a distance $l_0$ along the horizontal axis. The three moving links are $OA$, $AB$, and $DB$, with lengths $l_1$, $l_2$, and $l_3$, respectively. Their absolute orientations $\theta_1$, $\theta_2$, and $\theta_3$ are measured counterclockwise from the positive $x$-axis. The second link connects the moving joints $A$ and $B$, while the third link is directed from $D$ to $B$.
+
+For consistency across the formulations, the moving links are modelled as rigid, uniform bars with masses $m_i$, centre-of-mass moments of inertia $I_i=m_i l_i^2/12$, and centres of mass at their midpoints. The ground link is stationary and contributes no kinetic energy. Gravity acts in the negative $y$-direction, with magnitude $g$. Unless otherwise stated, the joints are frictionless, and an optional driving torque $\tau$ acts on link~1 at $O$. Setting $\tau=0$ gives the freely moving linkage. Unlike a chain of massless rods carrying point masses, the present model includes the rotational inertia of each moving bar.
+
+Defining the in-plane unit vectors
+\begin{equation}
+    \mathbf e_i=\begin{pmatrix}\cos\theta_i\\\sin\theta_i\end{pmatrix},
+    \qquad
+    \mathbf n_i=\begin{pmatrix}-\sin\theta_i\\\cos\theta_i\end{pmatrix},
+    \qquad i=1,2,3,
+\end{equation}
+the moving joint positions are
+\begin{equation}
+    \mathbf r_O=\begin{pmatrix}0\\0\end{pmatrix},\quad
+    \mathbf r_D=\begin{pmatrix}l_0\\0\end{pmatrix},\quad
+    \mathbf r_A=l_1\mathbf e_1,\quad
+    \mathbf r_B=\mathbf r_A+l_2\mathbf e_2=\mathbf r_D+l_3\mathbf e_3.
+\end{equation}
+It can be sown that $\frac{d \mathbf e_i}{dt} = \dot \theta_i \mathbf n_i$ and
+$\frac{d \mathbf n_i}{dt} = - \dot \theta_i \mathbf e_i$. The last equality is the vector loop-closure condition,
+\begin{equation}
+    l_1\mathbf e_1+l_2\mathbf e_2-l_3\mathbf e_3-l_0\begin{pmatrix}1\\0\end{pmatrix}=\mathbf0.
+    \label{eq:fourbar_vector_closure}
+\end{equation}
+In scalar form this supplies two holonomic constraints,
+\begin{align}
+    \Phi_x(\boldsymbol\theta)
+    &=l_1\cos\theta_1+l_2\cos\theta_2-l_3\cos\theta_3-l_0=0,\\
+    \Phi_y(\boldsymbol\theta)
+    &=l_1\sin\theta_1+l_2\sin\theta_2-l_3\sin\theta_3=0.
+    \label{eq:fourbar_closure}
+\end{align}
+Three angular coordinates subject to two independent constraints leave one degree of freedom in a regular configuration. Accordingly, specifying an input angle determines the other two angles up to the chosen assembly branch, provided the configuration is kinematically admissible.
+
+A necessary condition for the two moving joints to close for a chosen input angle is that the distance $\rho=\lVert\mathbf r_D-\mathbf r_A\rVert$ can form a triangle with links~2 and~3:
+\begin{equation}
+    |l_2-l_3|\leq\rho=\sqrt{l_0^2+l_1^2-2l_0l_1\cos\theta_1}\leq l_2+l_3.
+\end{equation}
+This result is derived from the triangle inequalities; and is useful when choosing consistent initial configurations.
+
+\subsection{Euler--Lagrange Formalism}
+\label{subsec:fourbar_lagrange}
+
+The centres of mass of the three moving links are located at
+\begin{align}
+    \mathbf r_{G_1}&=\frac{l_1}{2}\mathbf e_1,\\
+    \mathbf r_{G_2}&=l_1\mathbf e_1+\frac{l_2}{2}\mathbf e_2,\\
+    \mathbf r_{G_3}&=\mathbf r_D+\frac{l_3}{2}\mathbf e_3.
+\end{align}
+Differentiation with respect to time gives
+\begin{align}
+    \mathbf v_{G_1}&=\frac{l_1}{2}\dot\theta_1\mathbf n_1,\\
+    \mathbf v_{G_2}&=l_1\dot\theta_1\mathbf n_1
+                  +\frac{l_2}{2}\dot\theta_2\mathbf n_2,\\
+    \mathbf v_{G_3}&=\frac{l_3}{2}\dot\theta_3\mathbf n_3.
+\end{align}
+Each link undergoes planar translation and rotation, so its kinetic energy is the sum of the centre-of-mass translational energy and the rotational energy about its centre of mass:
+\begin{equation}
+    \mathcal T=\sum_{i=1}^3\left(
+      \frac12m_i\mathbf v_{G_i}\!\cdot\!\mathbf v_{G_i}
+      +\frac12I_i\dot\theta_i^2\right).
+\end{equation}
+Using $\mathbf n_i\cdot\mathbf n_j=\cos(\theta_i-\theta_j)$, this can be written without expanding the equations of motion:
+\begin{align}
+    \mathcal T={}&
+    \frac12\left(I_1+\frac14m_1l_1^2+m_2l_1^2\right)\dot\theta_1^2
+    +\frac12\left(I_2+\frac14m_2l_2^2\right)\dot\theta_2^2\nonumber\\
+    &+\frac12\left(I_3+\frac14m_3l_3^2\right)\dot\theta_3^2
+    +\frac12m_2l_1l_2\dot\theta_1\dot\theta_2
+      \cos(\theta_1-\theta_2).
+\end{align}
+Taking the ground-pivot height as zero, the gravitational potential energy is
+\begin{equation}
+    \mathcal V=g\left[
+      \left(\frac12m_1+m_2\right)l_1\sin\theta_1
+      +\frac12m_2l_2\sin\theta_2
+      +\frac12m_3l_3\sin\theta_3\right].
+\end{equation}
+The Lagrangian is therefore $\mathcal L=\mathcal T-\mathcal V$. The angles $\boldsymbol\theta=(\theta_1,\theta_2,\theta_3)^\top$ are not independent, since they must obey Eq.~\eqref{eq:fourbar_closure}. We therefore retain the three angles as redundant generalized coordinates and introduce two Lagrange multipliers $\lambda_x$ and $\lambda_y$:
+\begin{equation}
+    \frac{d}{dt}\left(\frac{\partial\mathcal L}{\partial\dot\theta_i}\right)
+    -\frac{\partial\mathcal L}{\partial\theta_i}
+    +\lambda_x\frac{\partial\Phi_x}{\partial\theta_i}
+    +\lambda_y\frac{\partial\Phi_y}{\partial\theta_i}
+    =Q_i,\qquad i=1,2,3.
+    \label{eq:fourbar_el_constrained}
+\end{equation}
+Here $\mathbf Q=(\tau,0,0)^\top$ for an applied torque at $O$, and the multipliers enforce the loop closure. The derivatives in Eq.~\eqref{eq:fourbar_el_constrained} will be evaluated and assembled into their explicit acceleration-linear form using \texttt{Symbolics.jl} in the next stage; no expanded symbolic result is assumed here.
 
 \subsection{Solving DAEs}
+\label{subsec:fourbar_dae}
 
-\subsection{Newton-Euler Formalism}
+An alternative formulation uses the Cartesian coordinates of the two moving joints rather than the three link angles. Define
+\begin{equation}
+    \mathbf q=(x_A,y_A,x_B,y_B)^\top,
+    \qquad
+    \mathbf r_A=\begin{pmatrix}x_A\\y_A\end{pmatrix},\quad
+    \mathbf r_B=\begin{pmatrix}x_B\\y_B\end{pmatrix}.
+\end{equation}
+The geometry introduces four Cartesian coordinates, constrained by the lengths of the three moving links. Writing the constraints with a factor of $1/2$ for convenience gives
+\begin{align}
+    \Psi_1(\mathbf q)&=\frac12(x_A^2+y_A^2-l_1^2)=0,\\
+    \Psi_2(\mathbf q)&=\frac12\bigl[(x_B-x_A)^2+(y_B-y_A)^2-l_2^2\bigr]=0,\\
+    \Psi_3(\mathbf q)&=\frac12\bigl[(x_B-l_0)^2+y_B^2-l_3^2\bigr]=0.
+    \label{eq:fourbar_cartesian_constraints}
+\end{align}
+Only one degree of freedom remains. Let $\Delta x=x_B-x_A$ and $\Delta y=y_B-y_A$. The constraint Jacobian is
+\begin{equation}
+    J_c(\mathbf q)=\frac{\partial\boldsymbol\Psi}{\partial\mathbf q}
+    =\begin{pmatrix}
+      x_A&y_A&0&0\\
+      -\Delta x&-\Delta y&\Delta x&\Delta y\\
+      0&0&x_B-l_0&y_B
+    \end{pmatrix},
+\end{equation}
+where $\boldsymbol\Psi=(\Psi_1,\Psi_2,\Psi_3)^\top$. Differentiating the constraints once gives the velocity equations $J_c\dot{\mathbf q}=\mathbf0$. A second differentiation gives the acceleration-level constraints
+\begin{equation}
+    J_c(\mathbf q)\ddot{\mathbf q}
+    =-\dot J_c(\mathbf q,\dot{\mathbf q})\dot{\mathbf q},
+    \label{eq:fourbar_cartesian_acc_constraint}
+\end{equation}
+whose scalar forms are particularly simple:
+\begin{align}
+    x_A\ddot x_A+y_A\ddot y_A
+    &=-\bigl(\dot x_A^2+\dot y_A^2\bigr),\\
+    \Delta x(\ddot x_B-\ddot x_A)
+      +\Delta y(\ddot y_B-\ddot y_A)
+    &=-\bigl[(\dot x_B-\dot x_A)^2+(\dot y_B-\dot y_A)^2\bigr],\\
+    (x_B-l_0)\ddot x_B+y_B\ddot y_B
+    &=-\bigl(\dot x_B^2+\dot y_B^2\bigr).
+    \label{eq:fourbar_cartesian_acc_components}
+\end{align}
+
+The rigid links have distributed mass, so their kinetic energy cannot be obtained merely by placing the masses $m_i$ at the moving joints. Their centre-of-mass velocities are, instead,
+\begin{equation}
+    \mathbf v_{G_1}=\frac12\dot{\mathbf r}_A,\qquad
+    \mathbf v_{G_2}=\frac12(\dot{\mathbf r}_A+\dot{\mathbf r}_B),\qquad
+    \mathbf v_{G_3}=\frac12\dot{\mathbf r}_B.
+\end{equation}
+The angular velocities of the bars may be expressed using their endpoint positions and velocities:
+\begin{align}
+    \dot\theta_1&=\frac{[\mathbf r_A,\dot{\mathbf r}_A]}{l_1^2},\\
+    \dot\theta_2&=\frac{[\mathbf r_B-\mathbf r_A,\dot{\mathbf r}_B-\dot{\mathbf r}_A]}{l_2^2},\\
+    \dot\theta_3&=\frac{[\mathbf r_B-\mathbf r_D,\dot{\mathbf r}_B]}{l_3^2}.
+\end{align}
+Here $[\mathbf u,\mathbf v]=u_xv_y-u_yv_x$ denotes the scalar planar cross product. These expressions hold for velocities satisfying the rigid-link constraints. Consequently, the Cartesian kinetic and potential energies are
+\begin{align}
+    \mathcal T_c={}&\frac18m_1\lVert\dot{\mathbf r}_A\rVert^2
+    +\frac18m_2\lVert\dot{\mathbf r}_A+\dot{\mathbf r}_B\rVert^2
+    +\frac18m_3\lVert\dot{\mathbf r}_B\rVert^2\nonumber\\
+    &+\frac12\sum_{i=1}^{3}I_i\dot\theta_i^2,\\
+    \mathcal V_c={}&\frac12m_1gy_A+\frac12m_2g(y_A+y_B)+\frac12m_3gy_B.
+\end{align}
+In $\mathcal T_c$, each $\dot\theta_i$ is understood as the Cartesian expression given above, so $\mathcal L_c=\mathcal T_c-\mathcal V_c$ depends only on $(\mathbf q,\dot{\mathbf q})$. The associated constrained Euler--Lagrange equations are
+\begin{equation}
+    \frac{d}{dt}\frac{\partial\mathcal L_c}{\partial\dot q_i}
+    -\frac{\partial\mathcal L_c}{\partial q_i}
+    +\sum_{a=1}^{3}\lambda_a\frac{\partial\Psi_a}{\partial q_i}
+    =Q_{c,i},\qquad i=1,\ldots,4.
+    \label{eq:fourbar_cartesian_el}
+\end{equation}
+For an actuator torque $\tau$ at the input pivot, the virtual-work relation $\delta W=\tau\,\delta\theta_1$ gives
+\begin{equation}
+    \mathbf Q_c=\frac{\tau}{l_1^2}
+    \begin{pmatrix}-y_A\\x_A\\0\\0\end{pmatrix},
+\end{equation}
+and $\mathbf Q_c=\mathbf0$ in the unforced case.
+
+Because the Cartesian kinetic energy is quadratic in the velocities, the unconstrained equations can be expressed as $M_c(\mathbf q)\ddot{\mathbf q}+\mathbf c_c(\mathbf q,\dot{\mathbf q})=\mathbf Q_c-J_c^\top\boldsymbol\lambda$. Combining them with Eq.~\eqref{eq:fourbar_cartesian_acc_constraint} produces the DAE system
+\begin{equation}
+    \boxed{
+    \begin{pmatrix}
+        M_c(\mathbf q)&J_c(\mathbf q)^\top\\
+        J_c(\mathbf q)&0_{3\times3}
+    \end{pmatrix}
+    \begin{pmatrix}
+        \ddot{\mathbf q}\\\boldsymbol\lambda
+    \end{pmatrix}
+    =\begin{pmatrix}
+        \mathbf Q_c-\mathbf c_c(\mathbf q,\dot{\mathbf q})\\
+        -\dot J_c(\mathbf q,\dot{\mathbf q})\dot{\mathbf q}
+    \end{pmatrix}.}
+    \label{eq:fourbar_dae_block}
+\end{equation}
+At each regular configuration this $7\times7$ system determines four Cartesian accelerations and three constraint multipliers. The explicit entries of $M_c$ and $\mathbf c_c$ are reserved for symbolic differentiation. Initial positions and velocities must satisfy both $\boldsymbol\Psi=\mathbf0$ and $J_c\dot{\mathbf q}=\mathbf0$. Since integrating differentiated constraints can cause drift, the original position and velocity constraints must also be monitored or enforced by an appropriate constraint-preserving scheme.
+
+For a prescribed input angle $\theta_1$, the determination of $\theta_2$ and $\theta_3$ from the closure equations is locally nonsingular only if
+\begin{equation}
+    \det\frac{\partial(\Phi_x,\Phi_y)}{\partial(\theta_2,\theta_3)}
+    =l_2l_3\sin(\theta_2-\theta_3)\ne0.
+\end{equation}
+Thus the input-angle parametrisation becomes singular when the coupler and output link are collinear. This does not necessarily imply a rank loss of the full Cartesian constraint Jacobian; the distinction matters when selecting a numerical method.
+
+\subsection{Newton--Euler Formalism}
+\label{subsec:fourbar_newton_euler}
+
+The Newton--Euler formulation instead begins with the forces and moments acting on each moving link. Let $\mathbf R_O$ and $\mathbf R_D$ denote the forces exerted by the ground at the fixed pivots, let $\mathbf R_A$ be the force exerted by link~2 on link~1 at $A$, and let $\mathbf R_B$ be the force exerted by link~3 on link~2 at $B$. The equal-and-opposite forces on the neighbouring links follow from Newton's third law. Write $\mathbf e_y=(0,1)^\top$, so the weight of link $i$ is $-m_i g\mathbf e_y$.
+
+The translational accelerations of the centres of mass follow by differentiating their positions twice:
+\begin{align}
+    \mathbf a_A&=l_1(\ddot\theta_1\mathbf n_1-\dot\theta_1^2\mathbf e_1),\\
+    \mathbf a_B&=\mathbf a_A+l_2(\ddot\theta_2\mathbf n_2-\dot\theta_2^2\mathbf e_2)
+                 =l_3(\ddot\theta_3\mathbf n_3-\dot\theta_3^2\mathbf e_3),\\
+    \mathbf a_{G_1}&=\frac{l_1}{2}(\ddot\theta_1\mathbf n_1-\dot\theta_1^2\mathbf e_1),\\
+    \mathbf a_{G_2}&=\mathbf a_A+\frac{l_2}{2}(\ddot\theta_2\mathbf n_2-\dot\theta_2^2\mathbf e_2),\\
+    \mathbf a_{G_3}&=\frac{l_3}{2}(\ddot\theta_3\mathbf n_3-\dot\theta_3^2\mathbf e_3).
+\end{align}
+Newton's second law applied separately to each link gives
+\begin{align}
+    m_1\mathbf a_{G_1}&=\mathbf R_O+\mathbf R_A-m_1g\mathbf e_y,\\
+    m_2\mathbf a_{G_2}&=-\mathbf R_A+\mathbf R_B-m_2g\mathbf e_y,\\
+    m_3\mathbf a_{G_3}&=-\mathbf R_B+\mathbf R_D-m_3g\mathbf e_y.
+    \label{eq:fourbar_newton_forces}
+\end{align}
+These are six scalar equations. Three additional equations are obtained from the moments about joints $O$, $A$, and $B$, one for each moving link.
+
+For a rigid body whose reference point $P$ moves with acceleration $\mathbf a_P$, the planar moment equation can be written as
+\begin{equation}
+    \sum\tau_P
+    =I_P\ddot\theta+m\bigl((\mathbf r_G-\mathbf r_P)\times\mathbf a_P\bigr)_z,
+    \label{eq:fourbar_moving_pivot}
+\end{equation}
+where $P$ is a point fixed on the body and $I_P=I_G+m\lVert\mathbf r_G-\mathbf r_P\rVert^2$. This relation reduces to the familiar $\sum\tau_P=I_P\ddot\theta$ for a stationary pivot. In particular, the acceleration correction cannot be discarded at $A$ or $B$.
+
+For \emph{link 1}, take moments about the fixed pivot $O$. The force $\mathbf R_O$ produces no moment about that point. Writing $[\mathbf u,\mathbf v]=u_xv_y-u_yv_x$ for the scalar planar cross product, one obtains
+\begin{equation}
+    \left(I_1+\frac14m_1l_1^2\right)\ddot\theta_1
+    =l_1[\mathbf e_1,\mathbf R_A]
+     -\frac12m_1gl_1\cos\theta_1+\tau.
+    \label{eq:fourbar_moment_O}
+\end{equation}
+
+For \emph{link 2}, take moments about the accelerating joint $A$. The force $-\mathbf R_A$ has zero moment about $A$, but the motion of $A$ contributes an inertial correction. Since $\mathbf r_{G_2}-\mathbf r_A=(l_2/2)\mathbf e_2$,
+\begin{equation}
+    \left(I_2+\frac14m_2l_2^2\right)\ddot\theta_2
+    +\frac12m_2l_2[\mathbf e_2,\mathbf a_A]
+    =l_2[\mathbf e_2,\mathbf R_B]
+     -\frac12m_2gl_2\cos\theta_2.
+    \label{eq:fourbar_moment_A}
+\end{equation}
+
+For \emph{link 3}, take moments about the accelerating joint $B$. Here the force $-\mathbf R_B$ produces no moment, while $\mathbf r_{G_3}-\mathbf r_B=-(l_3/2)\mathbf e_3$ and $\mathbf r_D-\mathbf r_B=-l_3\mathbf e_3$. Hence
+\begin{equation}
+    \left(I_3+\frac14m_3l_3^2\right)\ddot\theta_3
+    -\frac12m_3l_3[\mathbf e_3,\mathbf a_B]
+    =-l_3[\mathbf e_3,\mathbf R_D]
+     +\frac12m_3gl_3\cos\theta_3.
+    \label{eq:fourbar_moment_B}
+\end{equation}
+
+Together, the six scalar force balances in Eq.~\eqref{eq:fourbar_newton_forces}, the three moment balances in Eqs.~\eqref{eq:fourbar_moment_O}--\eqref{eq:fourbar_moment_B}, and the two acceleration-level closure equations give eleven scalar equations for the three angular accelerations and the eight scalar components of the four joint-reaction forces. The equations are linear in these unknowns at a fixed configuration and velocity. Their assembly and any algebraic elimination of the reaction forces will be carried out with \texttt{Symbolics.jl} in the subsequent computational treatment. The corresponding Newton--Euler, Euler--Lagrange, and DAE trajectories can then be compared using identical link parameters and consistent initial conditions.
