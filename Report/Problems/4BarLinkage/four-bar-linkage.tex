@@ -57,7 +57,7 @@ Differentiation with respect to time gives
                   +\frac{l_2}{2}\dot\theta_2\mathbf n_2,\\
     \mathbf v_{G_3}&=\frac{l_3}{2}\dot\theta_3\mathbf n_3.
 \end{align}
-Each link undergoes planar translation and rotation, so its kinetic energy is the sum of the centre-of-mass translational energy and the rotational energy about its centre of mass:
+Each link undergoes planar translation and rotation, so its kinetic energy is the sum of the centre-of-mass translational energy and the rotational energy about its centre of mass (Konig's Theorem):
 \begin{equation}
     \mathcal T=\sum_{i=1}^3\left(
       \frac12m_i\mathbf v_{G_i}\!\cdot\!\mathbf v_{G_i}
@@ -90,6 +90,121 @@ The Lagrangian is therefore $\mathcal L=\mathcal T-\mathcal V$. The angles $\bol
 \end{equation}
 Here $\mathbf Q=(\tau,0,0)^\top$ for an applied torque at $O$, and the multipliers enforce the loop closure. The derivatives in Eq.~\eqref{eq:fourbar_el_constrained} will be evaluated and assembled into their explicit acceleration-linear form using \texttt{Symbolics.jl} in the next stage; no expanded symbolic result is assumed here.
 
+In order to solve for this system, first the generalized momentum is
+computed symbolically.
+
+\begin{equation}
+    p_i = \frac{\partial \mathcal L}{\partial \dot q_i}
+\end{equation}
+
+which in vector form is $\mathbf p = \frac{\partial \mathcal L}{\partial \dot{\mathbf q}}$. Then, expanding using
+the multivariate chain rule, each term of the non-conservative Euler-Lagrange equation is
+derived.
+
+\begin{equation}
+    \frac{d}{dt}
+    \left(
+    \frac{\partial\mathcal L}{\partial\dot q_i}
+    \right)
+    =
+    \sum_j
+    \frac{\partial^2\mathcal L}
+    {\partial q_j\partial\dot q_i}
+    \dot q_j
+    +
+    \sum_j
+    \frac{\partial^2\mathcal L}
+    {\partial\dot q_j\partial\dot q_i}
+    \ddot q_j.
+\end{equation}
+
+The intertial matrix is defined
+
+\begin{equation}
+    \undertilde{M} = \frac{\partial \mathbf{p}}{\partial \dot{\mathbf{q}}}.
+\end{equation}
+
+Thus, the follow expression is obtained:
+
+\begin{equation}
+    \frac{d}{dt}
+    \left(
+    \frac{\partial\mathcal L}{\partial\dot q_i}
+    \right)
+    =
+    \sum_j
+    \frac{\partial p_i}{\partial q_j}\dot q_j
+    +
+    \sum_j M_{ij}\ddot q_j.
+\end{equation}
+
+Substituing back into the Euler-Lagrange equation,
+
+\begin{equation} 
+    \sum_j M_{ij}\ddot q_j
+    +
+    \sum_j
+    \frac{\partial p_i}{\partial q_j}\dot q_j
+    -
+    \frac{\partial\mathcal L}{\partial q_i}
+    =
+    Q_i.
+\end{equation}
+
+a new term, $c_i$ is defined:
+
+\begin{equation} 
+    c_i=
+    \sum_j
+    \frac{\partial p_i}{\partial q_j}\dot q_j
+    -
+    \frac{\partial\mathcal L}{\partial q_i}.
+\end{equation}
+
+which, in matrix notation is
+
+\begin{equation}
+    \mathbf c=
+    \frac{\partial\mathbf p}{\partial\mathbf q}
+    \dot{\mathbf q}
+    -
+    \frac{\partial\mathcal L}{\partial\mathbf q}.
+\end{equation}
+
+Next the constraint Jacobian is dervied.
+
+\begin{equation}
+    J(\mathbf q) = \frac{\partial \mathbf \Phi}{\partial \mathbf q}
+\end{equation}
+
+which mandates that $J(\mathbf q) \cdot \dot{\mathbf q} = 0. $ The transpose of the Jacobian
+multiplied by some Lagrange multiplier equates to the generalized constraint forces.
+
+\begin{equation}
+    M\ddot{\mathbf q}
+    +
+    \mathbf c
+    +
+    J^T\lambda
+    =
+    \mathbf Q.
+\end{equation}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.80\textwidth]{Problems/4BarLinkage/results/lagrange/trajectories.png}
+    \caption{4 Bar Linkage---Example Trajectories solved using the Lagrangian Formalism}
+\end{figure}
+
+Since the system has only a single degree of free, it predictably exhibits
+periodic motion. An animation of the system is generated.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.50\textwidth]{Problems/4BarLinkage/results/lagrange/snapshot.png}
+    \caption{Animation snapshot from the solution obtainbed using the Lagrangian Formalism}
+\end{figure}
+
 \subsection{Solving DAEs}
 \label{subsec:fourbar_dae}
 
@@ -116,13 +231,22 @@ Only one degree of freedom remains. Let $\Delta x=x_B-x_A$ and $\Delta y=y_B-y_A
       0&0&x_B-l_0&y_B
     \end{pmatrix},
 \end{equation}
-where $\boldsymbol\Psi=(\Psi_1,\Psi_2,\Psi_3)^\top$. Differentiating the constraints once gives the velocity equations $J_c\dot{\mathbf q}=\mathbf0$. A second differentiation gives the acceleration-level constraints
+where $\boldsymbol\Psi=(\Psi_1,\Psi_2,\Psi_3)^\top$. Differentiating the constraints once 
+
 \begin{equation}
-    J_c(\mathbf q)\ddot{\mathbf q}
-    =-\dot J_c(\mathbf q,\dot{\mathbf q})\dot{\mathbf q},
-    \label{eq:fourbar_cartesian_acc_constraint}
+    \frac{\partial \mathbf \Psi}{\partial t} =
+    \frac{\partial \mathbf \Psi}{\partial \mathbf q} \cdot \frac{\partial \mathbf q}{\partial t} = 0
 \end{equation}
-whose scalar forms are particularly simple:
+
+gives the velocity equations $J_c\dot{\mathbf q}=\mathbf0$, where $J_c = \frac{\partial \mathbf \Psi}{\partial \mathbf q}$.
+A second differentiation gives the acceleration-level constraints
+
+\begin{align}
+    \frac{d}{dt} J_c \dot{\mathbf q} &= \frac{d\, J_c}{dt} \dot{\mathbf q} + J_c \ddot{\mathbf q} = 0 \nonumber \\
+    \implies J_c \ddot{\mathbf q} &= - \dot{J_C} \dot{\mathbf q}
+\end{align}
+
+whose scalar forms (that we may ignore, since these results can be arrived at computationally) are particularly simple:
 \begin{align}
     x_A\ddot x_A+y_A\ddot y_A
     &=-\bigl(\dot x_A^2+\dot y_A^2\bigr),\\
@@ -185,14 +309,87 @@ Because the Cartesian kinetic energy is quadratic in the velocities, the unconst
     \end{pmatrix}.}
     \label{eq:fourbar_dae_block}
 \end{equation}
-At each regular configuration this $7\times7$ system determines four Cartesian accelerations and three constraint multipliers. The explicit entries of $M_c$ and $\mathbf c_c$ are reserved for symbolic differentiation. Initial positions and velocities must satisfy both $\boldsymbol\Psi=\mathbf0$ and $J_c\dot{\mathbf q}=\mathbf0$. Since integrating differentiated constraints can cause drift, the original position and velocity constraints must also be monitored or enforced by an appropriate constraint-preserving scheme.
 
-For a prescribed input angle $\theta_1$, the determination of $\theta_2$ and $\theta_3$ from the closure equations is locally nonsingular only if
-\begin{equation}
-    \det\frac{\partial(\Phi_x,\Phi_y)}{\partial(\theta_2,\theta_3)}
-    =l_2l_3\sin(\theta_2-\theta_3)\ne0.
-\end{equation}
-Thus the input-angle parametrisation becomes singular when the coupler and output link are collinear. This does not necessarily imply a rank loss of the full Cartesian constraint Jacobian; the distinction matters when selecting a numerical method.
+The elements of this matrix equation are first constructed symbolically: $M_C, J_C, c_C$. And then the $7 \times 7$
+system will be solved numerically during integration.
+
+\begin{minted}{julia}
+# Symbolic Computations
+momentum = [Symbolics.derivative(L, v; simplify=false) for v in qd]
+M = Symbolics.jacobian(momentum, qd; simplify=false)
+c = Symbolics.jacobian(momentum, q; simplify=false) * qd -
+    [Symbolics.derivative(L, qi; simplify=false) for qi in q]
+Jdot = [sum(Symbolics.derivative(J[a, i], q[j]; simplify=false) * qd[j]
+                for j in 1:4) for a in 1:3, i in 1:4]
+gamma = Jdot * qd
+...
+functions = (
+    M = compile_array(M),
+    c = compile_array(c),
+    J = compile_array(J),
+    Jdot = compile_array(Jdot),
+    gamma = compile_array(gamma),
+    Psi = compile_array(Psi),
+    energy = compile_scalar(T + V),
+)
+\end{minted}
+
+\begin{minted}{julia}
+# Dynamics
+"""Assemble K=[M_c J_c'; J_c 0] and its right-hand side."""
+function kkt_system(model::FourBarModel, u::AbstractVector, t::Real)
+    q, qd = u[1:4], u[5:8]
+    f, pars = model.symbolic.functions, model.parameter_values # Symbolic Lib Helpers
+
+    M = Matrix{Float64}(f.M(q, qd, pars))
+    c = Vector{Float64}(f.c(q, qd, pars))
+    J = Matrix{Float64}(f.J(q, qd, pars))
+    Jdot = Matrix{Float64}(f.Jdot(q, qd, pars))
+    gamma = Jdot*qd # J̇(q,q̇)q̇
+    tau = Float64(model.torque(t))
+    Q = (tau/model.parameters.l1^2) .* [-q[2], q[1], 0.0, 0.0]
+
+    # Our big matrix
+    K = zeros(7, 7)
+    K[1:4, 1:4] .= M
+    K[1:4, 5:7] .= J'
+    K[5:7, 1:4] .= J
+    rhs = [Q-c; -gamma]
+    return K, rhs
+end
+
+"""Solves the equations for ddot q and \lambda"""
+function dynamics(model::FourBarModel, u::AbstractVector, t::Real)
+    K, rhs = kkt_system(model, u, t)
+    solution = K \ rhs
+    return (; acceleration=solution[1:4], lambda=solution[5:7], matrix=K, rhs)
+end
+
+"""Gives the ODE solver the updates to the tracked state u = (q, \dot q)"""
+function rhs!(du, u, model::FourBarModel, t)
+    du[1:4] .= u[5:8]
+    du[5:8] .= dynamics(model, u, t).acceleration
+    return nothing
+end
+\end{minted}
+
+The Cartesian DAE system is integrated numerically, with the link-length
+constraints enforced throughout the simulation. The resulting joint
+trajectories and a representative animation frame are shown below.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.80\textwidth]{Problems/4BarLinkage/results/DAE/trajectories.png}
+    \caption{Four-bar joint trajectories obtained from the Cartesian DAE simulation (DAE results).}
+    \label{fig:fourbar_dae_trajectories}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.50\textwidth]{Problems/4BarLinkage/results/DAE/snapshot.png}
+    \caption{Representative animation frame from the Cartesian four-bar DAE simulation (DAE result).}
+    \label{fig:fourbar_dae_snapshot}
+\end{figure}
 
 \subsection{Newton--Euler Formalism}
 \label{subsec:fourbar_newton_euler}
